@@ -17,6 +17,9 @@ class PeriphUTimerBenchmarksIf(DutShell):
     FW_ID = 'periph_utimer_benchmarks'
 
     # Benchmark calls
+    def bench_gpio_latency(self):
+        """Execute GPIO latency benchmark."""
+        return self.send_cmd('bench_gpio_latency')
 
     # Util calls
     def get_metadata(self):
@@ -26,6 +29,7 @@ class PeriphUTimerBenchmarksIf(DutShell):
     def get_command_list(self):
         """List of all commands."""
         return [
+            self.bench_gpio_latency,
             self.get_metadata,
         ]
 
