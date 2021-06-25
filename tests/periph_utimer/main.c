@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 HAW Hamburg
+ * Copyright (C) 2021 HAW Hamburg
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -26,7 +26,7 @@
 #include <stdbool.h>
 
 #include "shell.h"
-#include "periph/timer.h"
+#include "periph/utimer.h"
 #include "periph/gpio.h"
 #include "mutex.h"
 
@@ -44,7 +44,7 @@
 #define CB_LOW_STR      "cb_low"
 
 static mutex_t cb_mutex;
-static gpio_t debug_pins[TIMER_NUMOF];
+static gpio_t debug_pins[UTIMER_NUMOF];
 
 static inline void _debug_toogle(gpio_t pin)
 {
@@ -81,7 +81,7 @@ static int _print_cmd_result(const char *cmd, bool success, int ret,
     return success ? RESULT_OK : RESULT_ERROR;
 }
 
-void cb_toggle(void *arg, tim_int_t cause, int channel)
+void cb_toggle(void *arg, utim_int_t cause, int channel)
 {
     (void)cause;
     (void)channel;
@@ -90,7 +90,7 @@ void cb_toggle(void *arg, tim_int_t cause, int channel)
     mutex_unlock(&cb_mutex);
 }
 
-void cb_high(void *arg, tim_int_t cause, int channel)
+void cb_high(void *arg, utim_int_t cause, int channel)
 {
     (void)cause;
     (void)channel;
@@ -99,7 +99,7 @@ void cb_high(void *arg, tim_int_t cause, int channel)
     mutex_unlock(&cb_mutex);
 }
 
-void cb_low(void *arg, tim_int_t cause, int channel)
+void cb_low(void *arg, utim_int_t cause, int channel)
 {
     (void)cause;
     (void)channel;
@@ -116,7 +116,7 @@ int cmd_timer_init(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    int dev = sc_arg2dev(argv[1], TIMER_NUMOF);
+    int dev = sc_arg2dev(argv[1], UTIMER_NUMOF);
     if (dev < 0) {
         return -ENODEV;
     }
@@ -126,8 +126,8 @@ int cmd_timer_init(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    tim_clk_t clk = TIM_CLK_DEFAULT;
-    if (strncmp(argv[3], "TIM_CLK_DEFAULT", strlen(argv[3])) != 0) {
+    utim_clk_t clk = UTIM_CLK_DEFAULT;
+    if (strncmp(argv[3], "UTIM_CLK_DEFAULT", strlen(argv[3])) != 0) {
         return ARGS_ERROR;
     }
 
@@ -136,7 +136,7 @@ int cmd_timer_init(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    tim_cb_t cb = NULL;
+    utim_cb_t cb = NULL;
     if (strncmp(CB_TOGGLE_STR, argv[5], strlen(argv[5])) == 0) {
         cb = cb_toggle;
     }
@@ -152,8 +152,8 @@ int cmd_timer_init(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    tim_periph_t tim = timer_get_periph(dev);
-    int res = timer_init(&tim, freq, clk, ovf, cb, (void*)(intptr_t)debug_pins[dev]);
+    utim_periph_t tim = utimer_get_periph(dev);
+    int res = utimer_init(&tim, freq, clk, ovf, cb, (void*)(intptr_t)debug_pins[dev]);
 
     return _print_cmd_result("timer_init", res == 0, res, true);
 }
@@ -164,7 +164,7 @@ int _timer_set(int argc, char **argv, bool absolute)
         return ARGS_ERROR;
     }
 
-    int dev = sc_arg2dev(argv[1], TIMER_NUMOF);
+    int dev = sc_arg2dev(argv[1], UTIMER_NUMOF);
     if (dev < 0) {
         return -ENODEV;
     }
@@ -180,15 +180,15 @@ int _timer_set(int argc, char **argv, bool absolute)
     }
 
     int res = 0;
-    tim_periph_t tim = timer_get_periph(dev);
+    utim_periph_t tim = utimer_get_periph(dev);
     mutex_lock(&cb_mutex);
 
     _debug_toogle(debug_pins[dev]);
     if (absolute) {
-        res = timer_set_absolute(&tim, chan, timeout);
+        res = utimer_set_absolute(&tim, chan, timeout);
     }
     else {
-        res = timer_set(&tim, chan, timeout);
+        res = utimer_set(&tim, chan, timeout);
     }
 
     /* wait for unlock by cb */
@@ -218,7 +218,7 @@ int cmd_timer_clear(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    int dev = sc_arg2dev(argv[1], TIMER_NUMOF);
+    int dev = sc_arg2dev(argv[1], UTIMER_NUMOF);
     if (dev < 0) {
         return -ENODEV;
     }
@@ -228,8 +228,8 @@ int cmd_timer_clear(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    tim_periph_t tim = timer_get_periph(dev);
-    int res = timer_clear(&tim, chan);
+    utim_periph_t tim = utimer_get_periph(dev);
+    int res = utimer_clear(&tim, chan);
 
     return _print_cmd_result("timer_clear", (res == 0), res, true);
 }
@@ -240,13 +240,13 @@ int cmd_timer_read(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    int dev = sc_arg2dev(argv[1], TIMER_NUMOF);
+    int dev = sc_arg2dev(argv[1], UTIMER_NUMOF);
     if (dev < 0) {
         return -ENODEV;
     }
 
-    tim_periph_t tim = timer_get_periph(dev);
-    printf("Success: timer_read(): [%u]\n", timer_read(&tim));
+    utim_periph_t tim = utimer_get_periph(dev);
+    printf("Success: timer_read(): [%u]\n", utimer_read(&tim));
     return RESULT_OK;
 }
 
@@ -256,13 +256,13 @@ int cmd_timer_start(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    int dev = sc_arg2dev(argv[1], TIMER_NUMOF);
+    int dev = sc_arg2dev(argv[1], UTIMER_NUMOF);
     if (dev < 0) {
         return -ENODEV;
     }
 
-    tim_periph_t tim = timer_get_periph(dev);
-    timer_start(&tim);
+    utim_periph_t tim = utimer_get_periph(dev);
+    utimer_start(&tim);
     return _print_cmd_result("timer_start", true, 0, false);
 }
 
@@ -272,13 +272,13 @@ int cmd_timer_stop(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    int dev = sc_arg2dev(argv[1], TIMER_NUMOF);
+    int dev = sc_arg2dev(argv[1], UTIMER_NUMOF);
     if (dev < 0) {
         return -ENODEV;
     }
 
-    tim_periph_t tim = timer_get_periph(dev);
-    timer_stop(&tim);
+    utim_periph_t tim = utimer_get_periph(dev);
+    utimer_stop(&tim);
     return _print_cmd_result("timer_stop", true, 0, false);
 }
 
@@ -290,7 +290,7 @@ int cmd_timer_debug_pin(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    int dev = sc_arg2dev(argv[1], TIMER_NUMOF);
+    int dev = sc_arg2dev(argv[1], UTIMER_NUMOF);
     if (dev < 0) {
         return -ENODEV;
     }
@@ -314,7 +314,7 @@ int cmd_timer_bench_read(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    int dev = sc_arg2dev(argv[1], TIMER_NUMOF);
+    int dev = sc_arg2dev(argv[1], UTIMER_NUMOF);
     if (dev < 0) {
         return -ENODEV;
     }
@@ -326,9 +326,9 @@ int cmd_timer_bench_read(int argc, char **argv)
 
     _debug_toogle(debug_pins[dev]);
 
-    tim_periph_t tim = timer_get_periph(dev);
+    utim_periph_t tim = utimer_get_periph(dev);
     for (unsigned int i = 0; i < repeat; i++) {
-        timer_read(&tim);
+        utimer_read(&tim);
     }
 
     _debug_toogle(debug_pins[dev]);
@@ -368,7 +368,7 @@ int main(void)
     puts("Start: Test for the utimer API");
 
     /* set all debug pins to undef */
-    for (unsigned i = 0; i < TIMER_NUMOF; ++i) {
+    for (unsigned i = 0; i < UTIMER_NUMOF; ++i) {
         debug_pins[i] = GPIO_UNDEF;
     }
 
