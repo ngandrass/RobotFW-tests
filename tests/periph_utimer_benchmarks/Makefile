@@ -1,7 +1,7 @@
 include ../Makefile.tests_common
 
 USEMODULE += shell
-FEATURES_REQUIRED += periph_timer
+USEMODULE += periph_utimer
 FEATURES_REQUIRED += periph_gpio
 FEATURES_REQUIRED += HIL_DUT_IC_PORT
 FEATURES_REQUIRED += HIL_DUT_IC_PIN

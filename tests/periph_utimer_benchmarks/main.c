@@ -27,7 +27,7 @@
 #include "shell.h"
 #include "test_helpers.h"
 #include "periph/gpio.h"
-#include "periph/timer.h"
+#include "periph/utimer.h"
 
 #include "sc_args.h"
 
@@ -64,6 +64,9 @@ static void spin(uint32_t n) {
  * consecutive rising edges on the GPIO_IC pin.
  */
 int cmd_bench_gpio_latency(int argc, char **argv) {
+    (void) argc;
+    (void) argv;
+
     gpio_clear(GPIO_IC);
 
     for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
