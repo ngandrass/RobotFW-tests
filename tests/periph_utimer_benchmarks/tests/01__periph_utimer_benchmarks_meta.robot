@@ -34,7 +34,6 @@ Measure GPIO Latency
 
     API Call Should Succeed     Bench GPIO Latency
     API Call Should Succeed     PHILIP.Read Trace
-    Record Property             bench_gpio_latency  ${RESULT['data']}
-
-    # ${GPIO_LATENCY}=           DutDeviceIf.Compress Result  ${RESULT['data']}
-    # Record Property            gpio_latency                 ${GPIO_LATENCY['diff']}
+#    Record Property             raw_trace                   ${RESULT['data']}
+    ${BENCH_GPIO_LATENCY} =     Process Bench GPIO Latency  ${RESULT['data']}
+    Record Property             bench_gpio_latency          ${BENCH_GPIO_LATENCY}

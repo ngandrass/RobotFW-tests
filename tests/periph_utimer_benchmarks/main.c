@@ -37,7 +37,7 @@
 
 #define DEFAULT_REPEAT_COUNT (50)
 
-#define F_CPU           MHZ(48)
+#define F_CPU           MHZ(16)
 #define CYCLES_PER_SEC  (F_CPU)
 #define CYCLES_PER_MSEC (CYCLES_PER_SEC / 1000)
 #define CYCLES_PER_USEC (CYCLES_PER_MSEC / 1000)
@@ -67,9 +67,14 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
     (void) argc;
     (void) argv;
 
+    // Start with GPIO_IC set to low
     gpio_clear(GPIO_IC);
+    spin(10 * CYCLES_PER_MSEC);
 
+    // Generate consecutive rising edges
     for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        gpio_clear(GPIO_IC);
         gpio_set(GPIO_IC);
         gpio_clear(GPIO_IC);
 
