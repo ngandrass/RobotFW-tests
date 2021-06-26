@@ -35,6 +35,10 @@
 #define PARSER_DEV_NUM 0
 #endif
 
+#ifndef BENCH_TIMER_DEV
+#define BENCH_TIMER_DEV 0
+#endif
+
 #define DEFAULT_REPEAT_COUNT (50)
 
 #define F_CPU           MHZ(16)
@@ -55,6 +59,23 @@ static void spin(uint32_t n) {
     }
 }
 
+/**
+ * @brief   Common setup procedure for all benchmarks
+ */
+static inline void _bench_setup(void) {
+    // Start with GPIO_IC set to low
+    gpio_clear(GPIO_IC);
+    spin(10 * CYCLES_PER_MSEC);
+}
+
+/**
+ * @brief   Common teardown procedure for all benchmarks
+ */
+static inline void _bench_teardown(void) {
+    // End with GPIO_IC set to low
+    gpio_clear(GPIO_IC);
+}
+
 /* Benchmarks */
 
 /**
@@ -67,9 +88,7 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
     (void) argc;
     (void) argv;
 
-    // Start with GPIO_IC set to low
-    gpio_clear(GPIO_IC);
-    spin(10 * CYCLES_PER_MSEC);
+    _bench_setup();
 
     // Generate consecutive rising edges
     for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
@@ -83,6 +102,41 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
 
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
 
+    _bench_teardown();
+    return 0;
+}
+
+/**
+ * @brief   Benchmarks time consumed by a uAPI timer read operation
+ *
+ * During timer read the GPIO_IC pin is pulled high and gets released
+ * immediately after utimer_read() returns.
+ */
+int cmd_bench_timer_read_uapi(int argc, char** argv) {
+    (void) argc;
+    (void) argv;
+
+    _bench_setup();
+
+    // Get timer peripheral
+    utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    if (tim.dev == UTIMER_DEV_INVALID) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+
+    // Perform benchmark (timer read)
+    for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        utimer_read(&tim);
+        gpio_clear(GPIO_IC);
+
+        spin(1 * CYCLES_PER_MSEC);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
     return 0;
 }
 
@@ -105,6 +159,7 @@ int cmd_get_metadata(int argc, char **argv) {
 
 static const shell_command_t shell_commands[] = {
     {"bench_gpio_latency", "Benchmarks latency of GPIO_DUT_IC", cmd_bench_gpio_latency},
+    {"bench_timer_read_uapi", "Benchmarks time consumed by a uAPI timer read", cmd_bench_timer_read_uapi},
     {"get_metadata", "Get the metadata of the test firmware", cmd_get_metadata},
     { NULL, NULL, NULL }
 };
