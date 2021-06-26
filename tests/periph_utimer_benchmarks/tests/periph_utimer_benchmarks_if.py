@@ -97,7 +97,6 @@ class PeriphUTimerBenchmarksIf(DutShell):
         """List of all commands."""
         return [
             self.bench_gpio_latency,
-            self.bench_
             self.get_metadata,
         ]
 

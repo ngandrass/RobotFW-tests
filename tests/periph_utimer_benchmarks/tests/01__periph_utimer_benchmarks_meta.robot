@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation       Verify basic functionality of the Periph Timer API.
+Documentation       Record metadata and determine system properties for all benchmarks.
 
 # reset application and check DUT has correct firmware, skip all tests on error
 Suite Setup         Run Keywords    PHILIP Reset

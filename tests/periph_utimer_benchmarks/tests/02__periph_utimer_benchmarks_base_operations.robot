@@ -18,10 +18,18 @@ Resource            periph_utimer_benchmarks.keywords.txt
 Force Tags          periph_utimer_benchmarks
 
 *** Test Cases ***
-Benchmark Timer Read
+Benchmark uAPI Timer Read
     [Teardown]                  Test Teardown
 
-    API Call Should Succeed     Bench Timer Read
+    API Call Should Succeed     Bench Timer Read            uAPI
     API Call Should Succeed     PHILIP.Read Trace
     ${BENCH_TIMER_READ} =       Process Bench Timer Read    ${RESULT['data']}
-    Record Property             bench_timer_read            ${BENCH_TIMER_READ}
+    Record Property             bench_timer_read_uapi       ${BENCH_TIMER_READ}
+
+Benchmark hAPI Timer Read
+    [Teardown]                  Test Teardown
+
+    API Call Should Succeed     Bench Timer Read            hAPI
+    API Call Should Succeed     PHILIP.Read Trace
+    ${BENCH_TIMER_READ} =       Process Bench Timer Read    ${RESULT['data']}
+    Record Property             bench_timer_read_hapi       ${BENCH_TIMER_READ}
