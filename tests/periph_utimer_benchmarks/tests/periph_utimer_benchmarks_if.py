@@ -71,14 +71,36 @@ class PeriphUTimerBenchmarksIf(DutShell):
             x['diff'] < 1e-3
         ]
 
-        return {
-            'min': np.min(read_durations),
-            'max': np.max(read_durations),
-            'avg': np.average(read_durations),
-            'mean': np.mean(read_durations),
-            'values': read_durations,
-            'samples': len(read_durations)
-        }
+        return self._calc_statistical_properties(read_durations)
+
+    def bench_timer_write(self, api):
+        """Execute timer write benchmark.
+
+        :param api: API to use ('uAPI' or 'hAPI')
+        """
+        api = str.lower(api)
+
+        if api == 'uapi':
+            return self.send_cmd('bench_timer_write_uapi')
+        elif api == 'hapi':
+            return self.send_cmd('bench_timer_write_hapi')
+        else:
+            raise ValueError("api must be either 'uAPI' or 'hAPI'")
+
+    def process_bench_timer_write(self, trace):
+        """Postprocess trace data from uAPI/hAPI timer write benchmark."""
+
+        # Select benchmark samples from trace
+        edges = trace[4:]
+
+        # Extract timer read durations (time between rising and falling edge)
+        read_durations = [x['diff'] for x in edges if
+            x['source'] == "DUT_IC" and
+            x['event'] == "FALLING" and
+            x['diff'] < 1e-3
+        ]
+
+        return self._calc_statistical_properties(read_durations)
 
     # Util calls
     def get_metadata(self):

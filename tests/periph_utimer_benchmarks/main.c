@@ -174,6 +174,73 @@ int cmd_bench_timer_read_hapi(int argc, char** argv) {
     return 0;
 }
 
+/**
+ * @brief   Benchmarks time consumed by a uAPI timer write operation
+ *
+ * During timer write the GPIO_IC pin is pulled high and gets released
+ * immediately after utimer_write() returns.
+ */
+int cmd_bench_timer_write_uapi(int argc, char** argv) {
+    (void) argc;
+    (void) argv;
+
+    _bench_setup();
+
+    // Get timer peripheral
+    utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    if (tim.dev == UTIMER_DEV_INVALID) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+
+    // Perform benchmark (uAPI timer write)
+    for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        utimer_write(&tim, 0x42);
+        gpio_clear(GPIO_IC);
+
+        spin(1 * CYCLES_PER_MSEC);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
+/**
+ * @brief   Benchmarks time consumed by a hAPI timer write operation
+ *
+ * During timer write the GPIO_IC pin is pulled high and gets released
+ * immediately after tim->write() returns.
+ */
+int cmd_bench_timer_write_hapi(int argc, char** argv) {
+    (void) argc;
+    (void) argv;
+
+    _bench_setup();
+
+    // Get timer peripheral
+    utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    if (tim.dev == UTIMER_DEV_INVALID) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+
+    // Perform benchmark (hAPI timer read)
+    for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        tim.driver->write(&tim, 0x42);
+        gpio_clear(GPIO_IC);
+
+        spin(1 * CYCLES_PER_MSEC);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
 
 /* Helper calls */
 
@@ -195,6 +262,8 @@ static const shell_command_t shell_commands[] = {
     {"bench_gpio_latency", "Benchmarks latency of GPIO_DUT_IC", cmd_bench_gpio_latency},
     {"bench_timer_read_uapi", "Benchmarks time consumed by a uAPI timer read", cmd_bench_timer_read_uapi},
     {"bench_timer_read_hapi", "Benchmarks time consumed by a hAPI timer read", cmd_bench_timer_read_hapi},
+    {"bench_timer_write_uapi", "Benchmarks time consumed by a uAPI timer write", cmd_bench_timer_write_uapi},
+    {"bench_timer_write_hapi", "Benchmarks time consumed by a hAPI timer write", cmd_bench_timer_write_hapi},
     {"get_metadata", "Get the metadata of the test firmware", cmd_get_metadata},
     { NULL, NULL, NULL }
 };
