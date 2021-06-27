@@ -32,15 +32,33 @@
 
 #include "sc_args.h"
 
+#define ENABLE_DEBUG (0)
+
 #ifndef PARSER_DEV_NUM
-#define PARSER_DEV_NUM 0
+#define PARSER_DEV_NUM (0)
 #endif
 
 #ifndef BENCH_TIMER_DEV
-#define BENCH_TIMER_DEV 0
+#define BENCH_TIMER_DEV (0)
 #endif
 
-#define DEFAULT_REPEAT_COUNT (50)
+/**
+ * @brief   Default amount of times a single benchmark is repeated
+ *
+ * The PHiLIP buffer only supports capturing 128 events. Therefore 50 duration
+ * measurements, requiring two edges each, are the default. This leaves room
+ * for 28 additional samples.
+ */
+#define DEFAULT_BENCH_REPEAT_COUNT  (50)
+
+/**
+ * @brief   Repeats a single operation 10 times
+ *
+ * PHiLIP requires some backoff-time between recorded events. Single operation
+ * micro-benchmarks therefore need to be repeated in order to safely capture
+ * the elapsed time period. Very short durations can't be measured reliably!
+ */
+#define REPEAT_10(X) X; X; X; X; X; X; X; X; X; X;
 
 #define F_CPU           MHZ(16)
 #define CYCLES_PER_SEC  (F_CPU)
@@ -103,7 +121,7 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
     _bench_setup(DISABLE_IRQs);
 
     // Generate consecutive rising edges
-    for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
         gpio_clear(GPIO_IC);
         gpio_set(GPIO_IC);
@@ -119,10 +137,10 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
 }
 
 /**
- * @brief   Benchmarks time consumed by a uAPI timer read operation
+ * @brief   Benchmarks time consumed by 10 uAPI timer read operations
  *
  * During timer read the GPIO_IC pin is pulled high and gets released
- * immediately after utimer_read() returns.
+ * immediately after the last utimer_read() returns.
  */
 int cmd_bench_timer_read_uapi(int argc, char** argv) {
     (void) argc;
@@ -138,9 +156,9 @@ int cmd_bench_timer_read_uapi(int argc, char** argv) {
     }
 
     // Perform benchmark (uAPI timer read)
-    for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        utimer_read(&tim);
+        REPEAT_10(utimer_read(&tim));
         gpio_clear(GPIO_IC);
 
         spin(1 * CYCLES_PER_MSEC);
@@ -153,10 +171,10 @@ int cmd_bench_timer_read_uapi(int argc, char** argv) {
 }
 
 /**
- * @brief   Benchmarks time consumed by a hAPI timer read operation
+ * @brief   Benchmarks time consumed by 10 hAPI timer read operations
  *
  * During timer read the GPIO_IC pin is pulled high and gets released
- * immediately after tim->read() returns.
+ * immediately after the last tim->read() returns.
  */
 int cmd_bench_timer_read_hapi(int argc, char** argv) {
     (void) argc;
@@ -173,9 +191,9 @@ int cmd_bench_timer_read_hapi(int argc, char** argv) {
     utim_driver_t *driver = tim.driver;
 
     // Perform benchmark (hAPI timer read)
-    for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        driver->read(&tim);
+        REPEAT_10(driver->read(&tim));
         gpio_clear(GPIO_IC);
 
         spin(1 * CYCLES_PER_MSEC);
@@ -188,10 +206,10 @@ int cmd_bench_timer_read_hapi(int argc, char** argv) {
 }
 
 /**
- * @brief   Benchmarks time consumed by a uAPI timer write operation
+ * @brief   Benchmarks time consumed by 10 uAPI timer write operations
  *
  * During timer write the GPIO_IC pin is pulled high and gets released
- * immediately after utimer_write() returns.
+ * immediately after the last utimer_write() returns.
  */
 int cmd_bench_timer_write_uapi(int argc, char** argv) {
     (void) argc;
@@ -207,9 +225,9 @@ int cmd_bench_timer_write_uapi(int argc, char** argv) {
     }
 
     // Perform benchmark (uAPI timer write)
-    for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        utimer_write(&tim, 0x42);
+        REPEAT_10(utimer_write(&tim, 0x42));
         gpio_clear(GPIO_IC);
 
         spin(1 * CYCLES_PER_MSEC);
@@ -222,10 +240,10 @@ int cmd_bench_timer_write_uapi(int argc, char** argv) {
 }
 
 /**
- * @brief   Benchmarks time consumed by a hAPI timer write operation
+ * @brief   Benchmarks time consumed by 10 hAPI timer write operations
  *
  * During timer write the GPIO_IC pin is pulled high and gets released
- * immediately after tim->write() returns.
+ * immediately after the last tim->write() returns.
  */
 int cmd_bench_timer_write_hapi(int argc, char** argv) {
     (void) argc;
@@ -242,9 +260,9 @@ int cmd_bench_timer_write_hapi(int argc, char** argv) {
     utim_driver_t *driver = tim.driver;
 
     // Perform benchmark (hAPI timer read)
-    for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        driver->write(&tim, 0x42);
+        REPEAT_10(driver->write(&tim, 0x42));
         gpio_clear(GPIO_IC);
 
         spin(1 * CYCLES_PER_MSEC);

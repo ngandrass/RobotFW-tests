@@ -62,7 +62,7 @@ class PeriphUTimerBenchmarksIf(DutShell):
         """Postprocess trace data from uAPI/hAPI timer read benchmark."""
 
         # Select benchmark samples from trace
-        edges = trace[4:]
+        edges = trace[2:]
 
         # Extract timer read durations (time between rising and falling edge)
         read_durations = [x['diff'] for x in edges if
@@ -70,6 +70,9 @@ class PeriphUTimerBenchmarksIf(DutShell):
             x['event'] == "FALLING" and
             x['diff'] < 1e-3
         ]
+
+        # Scale down from 10-times repeated instruction
+        read_durations = [x/10 for x in read_durations]
 
         return self._calc_statistical_properties(read_durations)
 
@@ -91,16 +94,19 @@ class PeriphUTimerBenchmarksIf(DutShell):
         """Postprocess trace data from uAPI/hAPI timer write benchmark."""
 
         # Select benchmark samples from trace
-        edges = trace[4:]
+        edges = trace[2:]
 
-        # Extract timer read durations (time between rising and falling edge)
-        read_durations = [x['diff'] for x in edges if
+        # Extract timer write durations (time between rising and falling edge)
+        write_durations = [x['diff'] for x in edges if
             x['source'] == "DUT_IC" and
             x['event'] == "FALLING" and
             x['diff'] < 1e-3
         ]
 
-        return self._calc_statistical_properties(read_durations)
+        # Scale down from 10-times repeated instruction
+        write_durations = [x/10 for x in write_durations]
+
+        return self._calc_statistical_properties(write_durations)
 
     # Util calls
     def get_metadata(self):
