@@ -33,27 +33,19 @@ class PeriphUTimerBenchmarksIf(DutShell):
         edge_diffs = [x['diff'] for x in consecutive_edges][1:]  # First edge doesn't count since it has no valid predecessor
 
         return {
-            'gpio_latency': {
+            'gpio_latency': self._calc_statistical_properties([x/2 for x in edge_diffs]),
                 # GPIO latency is half the diff between two rising edges since
                 # it requires two GPIO operations (clear + set) to produce one
                 # rising edge.
-                'min': np.min(edge_diffs)/2,
-                'max': np.max(edge_diffs)/2,
-                'avg': np.average(edge_diffs)/2,
-                'mean': np.mean(edge_diffs)/2
-            },
-            'edge_diffs': {
-                'min': np.min(edge_diffs),
-                'max': np.max(edge_diffs),
-                'avg': np.average(edge_diffs),
-                'mean': np.mean(edge_diffs),
-                'values': edge_diffs
-            },
-            'samples': len(edge_diffs)
+                #'min': np.min(edge_diffs)/2,
+                #'max': np.max(edge_diffs)/2,
+                #'avg': np.average(edge_diffs)/2,
+                #'mean': np.mean(edge_diffs)/2
+            'edge_diffs': self._calc_statistical_properties(edge_diffs)
         }
 
     def bench_timer_read(self, api):
-        """Execute uAPI timer read benchmark.
+        """Execute timer read benchmark.
 
         :param api: API to use ('uAPI' or 'hAPI')
         """
@@ -99,6 +91,18 @@ class PeriphUTimerBenchmarksIf(DutShell):
             self.bench_gpio_latency,
             self.get_metadata,
         ]
+
+    # Helper functions
+    @staticmethod
+    def _calc_statistical_properties(data):
+        return {
+            'min': np.min(data),
+            'max': np.max(data),
+            'avg': np.average(data),
+            'mean': np.mean(data),
+            'values': data,
+            'samples': len(data)
+        }
 
 
 def main():
