@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "irq.h"
 #include "shell.h"
 #include "test_helpers.h"
 #include "periph/gpio.h"
@@ -48,6 +49,9 @@
 
 #define GPIO_IC GPIO_PIN(HIL_DUT_IC_PORT, HIL_DUT_IC_PIN)
 
+#define DISABLE_IRQs    false
+#define ENABLE_IRQs     true
+
 /* Helper functions */
 
 /**
@@ -61,8 +65,15 @@ static void spin(uint32_t n) {
 
 /**
  * @brief   Common setup procedure for all benchmarks
+ *
+ * @param   irqs Whether IRQs get disabled for the following benchmark
  */
-static inline void _bench_setup(void) {
+static inline void _bench_setup(bool irqs) {
+    // Disable IRQs during test
+    if (irqs == DISABLE_IRQs) {
+        irq_disable();
+    }
+
     // Start with GPIO_IC set to low
     gpio_clear(GPIO_IC);
     spin(10 * CYCLES_PER_MSEC);
@@ -74,6 +85,7 @@ static inline void _bench_setup(void) {
 static inline void _bench_teardown(void) {
     // End with GPIO_IC set to low
     gpio_clear(GPIO_IC);
+    irq_enable();
 }
 
 /* Benchmarks */
@@ -88,7 +100,7 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
     (void) argc;
     (void) argv;
 
-    _bench_setup();
+    _bench_setup(DISABLE_IRQs);
 
     // Generate consecutive rising edges
     for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
@@ -116,7 +128,7 @@ int cmd_bench_timer_read_uapi(int argc, char** argv) {
     (void) argc;
     (void) argv;
 
-    _bench_setup();
+    _bench_setup(DISABLE_IRQs);
 
     // Get timer peripheral
     utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
@@ -150,7 +162,7 @@ int cmd_bench_timer_read_hapi(int argc, char** argv) {
     (void) argc;
     (void) argv;
 
-    _bench_setup();
+    _bench_setup(DISABLE_IRQs);
 
     // Get timer peripheral
     utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
@@ -158,11 +170,12 @@ int cmd_bench_timer_read_hapi(int argc, char** argv) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
     }
+    utim_driver_t *driver = tim.driver;
 
     // Perform benchmark (hAPI timer read)
     for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        tim.driver->read(&tim);
+        driver->read(&tim);
         gpio_clear(GPIO_IC);
 
         spin(1 * CYCLES_PER_MSEC);
@@ -184,7 +197,7 @@ int cmd_bench_timer_write_uapi(int argc, char** argv) {
     (void) argc;
     (void) argv;
 
-    _bench_setup();
+    _bench_setup(DISABLE_IRQs);
 
     // Get timer peripheral
     utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
@@ -218,7 +231,7 @@ int cmd_bench_timer_write_hapi(int argc, char** argv) {
     (void) argc;
     (void) argv;
 
-    _bench_setup();
+    _bench_setup(DISABLE_IRQs);
 
     // Get timer peripheral
     utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
@@ -226,11 +239,12 @@ int cmd_bench_timer_write_hapi(int argc, char** argv) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
     }
+    utim_driver_t *driver = tim.driver;
 
     // Perform benchmark (hAPI timer read)
     for (int i = 0; i < DEFAULT_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        tim.driver->write(&tim, 0x42);
+        driver->write(&tim, 0x42);
         gpio_clear(GPIO_IC);
 
         spin(1 * CYCLES_PER_MSEC);
