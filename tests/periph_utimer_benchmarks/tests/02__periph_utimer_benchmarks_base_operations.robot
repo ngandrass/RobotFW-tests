@@ -12,7 +12,7 @@ Suite Setup         Run Keywords    Default Suite Setup
 Test Setup          Run Keywords    Default Test Setup
 Test Teardown       Run Keywords    Default Test Teardown
 
-*** Test Cases ***
+*** Keywords ***
 Benchmark uAPI Timer Read
     API Call Should Succeed     Bench Timer Read            uAPI
     API Call Should Succeed     PHILIP.Read Trace
@@ -36,3 +36,16 @@ Benchmark hAPI Timer Write
     API Call Should Succeed     PHILIP.Read Trace
     ${BENCH_TIMER_WRITE} =      Process Bench Timer Read    ${RESULT['data']}
     Record Property             bench_timer_write_hapi      ${BENCH_TIMER_WRITE}
+
+*** Test Cases ***
+Benchmark uAPI Timer Read
+    Run Keyword  Repeat Benchmark uAPI Timer Read times ${TEST_REPEAT_TIMES}
+
+Benchmark hAPI Timer Read
+    Run Keyword  Repeat Benchmark hAPI Timer Read times ${TEST_REPEAT_TIMES}
+
+Benchmark uAPI Timer Write
+    Run Keyword  Repeat Benchmark uAPI Timer Write times ${TEST_REPEAT_TIMES}
+
+Benchmark hAPI Timer Write
+    Run Keyword  Repeat Benchmark hAPI Timer Write times ${TEST_REPEAT_TIMES}

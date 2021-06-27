@@ -4,6 +4,9 @@ Library             PeriphUTimerBenchmarks  port=%{PORT}  baudrate=%{BAUD}  time
 Resource            api_shell.keywords.txt
 Resource            philip.keywords.txt
 
+*** Variables ***
+${TEST_REPEAT_TIMES}    3  # Number of times a single benchmark test case is repeated by default
+
 *** Keywords ***
 # reset application and check DUT has correct firmware, skip all tests on error
 Default Suite Setup
@@ -22,3 +25,13 @@ Default Test Teardown
     No Operation
 #    RIOT Reset
 #    PHILIP Reset
+
+# Repeats a benchmark multiple times
+Repeat ${benchmark} times ${count}
+    RIOT Reset
+    PHILIP Reset
+
+    #${count}=  Convert to Integer  ${count}
+    FOR  ${i}  IN RANGE  ${count}
+        Run Keyword  ${benchmark}
+    END

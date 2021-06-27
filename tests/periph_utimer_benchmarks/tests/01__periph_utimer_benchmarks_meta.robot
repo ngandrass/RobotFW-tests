@@ -12,13 +12,7 @@ Suite Setup         Run Keywords    Default Suite Setup
 Test Setup          Run Keywords    Default Test Setup
 Test Teardown       Run Keywords    Default Test Teardown
 
-*** Test Cases ***
-Record Metadata
-    API Call Should Succeed     Get Metadata
-    Record Property             board           ${RESULT['data'][0]}
-    Record Property             riot_version    ${RESULT['data'][1]}
-    Record Property             testsuite       ${RESULT['data'][2]}
-
+*** Keywords ***
 Measure GPIO Latency
     # Only record rising edges
     Run Keyword                 PHILIP.Write and Execute  tmr.mode.trig_edge  1
@@ -28,3 +22,13 @@ Measure GPIO Latency
 #    Record Property             raw_trace                   ${RESULT['data']}
     ${BENCH_GPIO_LATENCY} =     Process Bench GPIO Latency  ${RESULT['data']}
     Record Property             bench_gpio_latency          ${BENCH_GPIO_LATENCY}
+
+*** Test Cases ***
+Record Metadata
+    API Call Should Succeed     Get Metadata
+    Record Property             board           ${RESULT['data'][0]}
+    Record Property             riot_version    ${RESULT['data'][1]}
+    Record Property             testsuite       ${RESULT['data'][2]}
+
+Measure GPIO Latency
+    Run Keyword  Repeat Measure GPIO Latency times ${TEST_REPEAT_TIMES}
