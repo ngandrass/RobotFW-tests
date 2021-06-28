@@ -47,13 +47,13 @@ Benchmark hAPI Timer Write
 
 *** Test Cases ***
 Benchmark uAPI Timer Read
-    Run Keyword  Repeat Benchmark uAPI Timer Read times ${TEST_REPEAT_TIMES}
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark uAPI Timer Read
 
 Benchmark hAPI Timer Read
-    Run Keyword  Repeat Benchmark hAPI Timer Read times ${TEST_REPEAT_TIMES}
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark hAPI Timer Read
 
 Benchmark uAPI Timer Write
-    Run Keyword  Repeat Benchmark uAPI Timer Write times ${TEST_REPEAT_TIMES}
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark uAPI Timer Write
 
 Benchmark hAPI Timer Write
-    Run Keyword  Repeat Benchmark hAPI Timer Write times ${TEST_REPEAT_TIMES}
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark hAPI Timer Write

@@ -30,9 +30,3 @@ Default Test Teardown
 Default Benchmark Setup
     RIOT Reset
     PHILIP Reset
-
-# Repeats a benchmark multiple times
-Repeat ${benchmark} times ${count}
-    FOR  ${i}  IN RANGE  ${count}
-        Run Keyword  ${benchmark}
-    END

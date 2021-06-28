@@ -33,4 +33,4 @@ Record Metadata
     Record Property             testsuite       ${RESULT['data'][2]}
 
 Measure GPIO Latency
-    Run Keyword  Repeat Measure GPIO Latency times ${TEST_REPEAT_TIMES}
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency
