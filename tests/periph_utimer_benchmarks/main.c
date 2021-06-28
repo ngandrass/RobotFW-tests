@@ -274,6 +274,71 @@ int cmd_bench_timer_write_hapi(int argc, char** argv) {
     return 0;
 }
 
+void _bench_absolute_timeouts_cb(void *arg, utim_int_t cause, int channel) {
+    gpio_clear(GPIO_IC);
+
+    (void) arg;
+    (void) cause;
+    (void) channel;
+
+    return;
+}
+
+/**
+ * @brief   Benchmarks a single absolute timeout
+ *
+ * The timer is initialized and set to zero before arming it to the desired
+ * timout. Once prepared the timer is started. GPIO_IC is held high until the
+ * time elapsed and the associated user callback is executed.
+ *
+ * @param argv[1]   Frequency used for the timer
+ * @param argv[2]   Timeout in ticks (absolute counter value)
+ */
+int cmd_bench_absolute_timeouts(int argc, char** argv) {
+    // Parse arguments
+    if (sc_args_check(argc, argv, 2, 2, "FREQ TIMEOUT") != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned long freq = 0;
+    if (sc_arg2ulong(argv[1], &freq) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned long timeout = 0;
+    if (sc_arg2ulong(argv[2], &timeout) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    // Get timer peripheral
+    utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    if (tim.dev == UTIMER_DEV_INVALID || tim.channels < 1) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    // Initialize timer and callback
+    utimer_init(&tim, freq, UTIM_CLK_DEFAULT, false, &_bench_absolute_timeouts_cb, NULL);
+    utimer_write(&tim, 0);
+    utimer_set(&tim, 0, timeout);
+
+    // Execute timeout by starting timer and setting GPIO_IC
+    utimer_start(&tim);
+    gpio_set(GPIO_IC);
+
+    // Wait for GPIO_IC to be cleard by attached callback function
+    while(gpio_read(GPIO_IC));
+    utimer_stop(&tim);
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
 /* Helper calls */
 
 int cmd_get_metadata(int argc, char **argv) {
@@ -296,6 +361,7 @@ static const shell_command_t shell_commands[] = {
     {"bench_timer_read_hapi", "Benchmarks time consumed by a hAPI timer read", cmd_bench_timer_read_hapi},
     {"bench_timer_write_uapi", "Benchmarks time consumed by a uAPI timer write", cmd_bench_timer_write_uapi},
     {"bench_timer_write_hapi", "Benchmarks time consumed by a hAPI timer write", cmd_bench_timer_write_hapi},
+    {"bench_absolute_timeout", "Benchmarks absolute timeouts", cmd_bench_absolute_timeouts},
     {"get_metadata", "Get the metadata of the test firmware", cmd_get_metadata},
     { NULL, NULL, NULL }
 };
