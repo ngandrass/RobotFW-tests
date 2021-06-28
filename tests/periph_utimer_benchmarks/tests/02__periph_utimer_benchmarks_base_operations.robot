@@ -14,24 +14,32 @@ Test Teardown       Run Keywords    Default Test Teardown
 
 *** Keywords ***
 Benchmark uAPI Timer Read
+    Run Keyword                 Default Benchmark Setup
+
     API Call Should Succeed     Bench Timer Read            uAPI
     API Call Should Succeed     PHILIP.Read Trace
     ${BENCH_TIMER_READ} =       Process Bench Timer Read    ${RESULT['data']}
     Record Property             bench_timer_read_uapi       ${BENCH_TIMER_READ}
 
 Benchmark hAPI Timer Read
+    Run Keyword                 Default Benchmark Setup
+
     API Call Should Succeed     Bench Timer Read            hAPI
     API Call Should Succeed     PHILIP.Read Trace
     ${BENCH_TIMER_READ} =       Process Bench Timer Read    ${RESULT['data']}
     Record Property             bench_timer_read_hapi       ${BENCH_TIMER_READ}
 
 Benchmark uAPI Timer Write
+    Run Keyword                 Default Benchmark Setup
+
     API Call Should Succeed     Bench Timer Write           uAPI
     API Call Should Succeed     PHILIP.Read Trace
     ${BENCH_TIMER_WRITE} =      Process Bench Timer Write   ${RESULT['data']}
     Record Property             bench_timer_write_uapi      ${BENCH_TIMER_WRITE}
 
 Benchmark hAPI Timer Write
+    Run Keyword                 Default Benchmark Setup
+
     API Call Should Succeed     Bench Timer Write            hAPI
     API Call Should Succeed     PHILIP.Read Trace
     ${BENCH_TIMER_WRITE} =      Process Bench Timer Read    ${RESULT['data']}

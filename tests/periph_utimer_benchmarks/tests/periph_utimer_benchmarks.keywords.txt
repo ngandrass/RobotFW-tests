@@ -26,12 +26,13 @@ Default Test Teardown
 #    RIOT Reset
 #    PHILIP Reset
 
-# Repeats a benchmark multiple times
-Repeat ${benchmark} times ${count}
+# Setup a benchmark
+Default Benchmark Setup
     RIOT Reset
     PHILIP Reset
 
-    #${count}=  Convert to Integer  ${count}
+# Repeats a benchmark multiple times
+Repeat ${benchmark} times ${count}
     FOR  ${i}  IN RANGE  ${count}
         Run Keyword  ${benchmark}
     END
