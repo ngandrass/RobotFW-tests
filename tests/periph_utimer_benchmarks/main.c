@@ -313,6 +313,8 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
         return ARGS_ERROR;
     }
 
+    _bench_setup(ENABLE_IRQs);
+
     // Get timer peripheral
     utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
     if (tim.dev == UTIMER_DEV_INVALID || tim.channels < 1) {
