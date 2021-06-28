@@ -108,6 +108,25 @@ class PeriphUTimerBenchmarksIf(DutShell):
 
         return self._calc_statistical_properties(write_durations)
 
+    def bench_absolute_timeout(self, freq, ticks):
+        """Executes the absolute timeout benchmark.
+
+        :param freq:    Frequency to initialize the timer to
+        :param ticks:   Number of absolute timer ticks to timeout
+        """
+        return self.send_cmd("bench_absolute_timeout {} {}".format(freq, ticks))
+
+    def process_bench_absolute_timeout(self, trace):
+        """Postprocess trace data from absolute timeout benchmark."""
+
+        # Extract recorded timeout durations (time between rising and falling edge)
+        timeout_durations = [x['diff'] for x in trace if
+            x['source'] == "DUT_IC" and
+            x['event'] == "FALLING"
+        ]
+
+        return self._calc_statistical_properties(timeout_durations)
+
     # Util calls
     def get_metadata(self):
         """Get the metadata of the firmware."""
@@ -131,6 +150,11 @@ class PeriphUTimerBenchmarksIf(DutShell):
             'values': data,
             'samples': len(data)
         }
+
+    @staticmethod
+    def concat_traces(head, tail):
+        """Concatenates two lists of traces."""
+        return head + tail
 
 
 def main():
