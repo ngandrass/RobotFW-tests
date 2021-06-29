@@ -60,10 +60,11 @@
  */
 #define REPEAT_10(X) X; X; X; X; X; X; X; X; X; X;
 
-#define F_CPU           MHZ(16)
-#define CYCLES_PER_SEC  (F_CPU)
-#define CYCLES_PER_MSEC (CYCLES_PER_SEC / 1000)
-#define CYCLES_PER_USEC (CYCLES_PER_MSEC / 1000)
+#define F_CPU                   MHZ(80)  /**< Main CPU clock frequency */
+#define INSTRUCTIONS_PER_SPIN   5        /**< Number of instructions consumed by a single spin operation */
+#define CYCLES_PER_SEC          (F_CPU / INSTRUCTIONS_PER_SPIN)
+#define CYCLES_PER_MSEC         (CYCLES_PER_SEC / 1000)
+#define CYCLES_PER_USEC         (CYCLES_PER_MSEC / 1000)
 
 #define GPIO_IC GPIO_PIN(HIL_DUT_IC_PORT, HIL_DUT_IC_PIN)
 
@@ -75,7 +76,7 @@
 /**
  * @brief   Busy wait (spin) for the given number of loop iterations
  */
-static void spin(uint32_t n) {
+static inline void spin(uint32_t n) {
     while (n--) {
         __asm__ volatile ("");
     }
