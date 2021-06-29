@@ -15,9 +15,7 @@ Test Teardown       Run Keywords    Default Test Teardown
 *** Keywords ***
 Measure GPIO Latency
     Run Keyword                 Default Benchmark Setup
-
-    # Only record rising edges
-    Run Keyword                 PHILIP.Write and Execute  tmr.mode.trig_edge  1
+    PHILIP Trigger Trace Event On Rising Edge Only
 
     API Call Should Succeed     Bench GPIO Latency
     API Call Should Succeed     PHILIP.Read Trace

@@ -24,3 +24,12 @@ PHILIP Trace GPIO ${pin}
     API Call Should Succeed   PHiLIP.Write Reg  gpio[${pin}].mode.init  0
     API Call Should Succeed   PHiLIP.Write Reg  gpio[${pin}].mode.io_type  3
     API Call Should Succeed   PHiLIP.Execute Changes
+
+PHILIP Trigger Trace Event On Both Edges
+    Run Keyword                 PHILIP.Write and Execute  tmr.mode.trig_edge  0
+
+PHILIP Trigger Trace Event On Rising Edge Only
+    Run Keyword                 PHILIP.Write and Execute  tmr.mode.trig_edge  1
+
+PHILIP Trigger Trace Event On Falling Edge Only
+    Run Keyword                 PHILIP.Write and Execute  tmr.mode.trig_edge  2
