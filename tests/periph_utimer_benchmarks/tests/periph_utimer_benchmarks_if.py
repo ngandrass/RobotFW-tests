@@ -24,25 +24,16 @@ class PeriphUTimerBenchmarksIf(DutShell):
 
     def process_bench_gpio_latency(self, trace):
         """Postprocess trace data from GPIO latency benchmark."""
-        consecutive_edges = [x for x in trace if
+        # Extract diffs between edges and remove intermediate wait period from results
+        edge_diffs_with_delay = [x['diff'] for x in trace if
             x['source'] == "DUT_IC" and
-            x['event'] == "RISING" and
-            1e-12 < x['diff'] < 1e-6
-        ]
+            x['diff'] < 1e-2
+        ][2:]  # First value has to diff, cut first two to be symmetrical between gpio_set() and gpio_clear()
 
-        edge_diffs = [x['diff'] for x in consecutive_edges][1:]  # First edge doesn't count since it has no valid predecessor
+        edge_delay = 1e-3  # 1 ms
+        edge_diffs = [x - edge_delay for x in edge_diffs_with_delay]
 
-        return {
-            'gpio_latency': self._calc_statistical_properties([x/2 for x in edge_diffs]),
-                # GPIO latency is half the diff between two rising edges since
-                # it requires two GPIO operations (clear + set) to produce one
-                # rising edge.
-                #'min': np.min(edge_diffs)/2,
-                #'max': np.max(edge_diffs)/2,
-                #'avg': np.average(edge_diffs)/2,
-                #'mean': np.mean(edge_diffs)/2
-            'edge_diffs': self._calc_statistical_properties(edge_diffs)
-        }
+        return self._calc_statistical_properties(edge_diffs)
 
     def bench_timer_read(self, api):
         """Execute timer read benchmark.

@@ -112,8 +112,9 @@ static inline void _bench_teardown(void) {
 /**
  * @brief   Benchmarks latency of the GPIO_IC pin
  *
- * The GPIO_IC pin is toggled repeatedly to measure the delay between two
- * consecutive rising edges on the GPIO_IC pin.
+ * The GPIO_IC pin is toggled repeatedly to measure the amount of time consumed
+ * by the gpio_set() and gpio_clear() calls. An extra microsecond is added due
+ * to PHiLIP backoff-time requirements.
  */
 int cmd_bench_gpio_latency(int argc, char **argv) {
     (void) argc;
@@ -124,10 +125,8 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
     // Generate consecutive rising edges
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
+        spin(1 * CYCLES_PER_MSEC);
         gpio_clear(GPIO_IC);
-        gpio_set(GPIO_IC);
-        gpio_clear(GPIO_IC);
-
         spin(1 * CYCLES_PER_MSEC);
     }
 
