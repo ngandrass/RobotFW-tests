@@ -31,7 +31,7 @@ class PeriphUTimerBenchmarksIf(DutShell):
         ][2:]  # First value has to diff, cut first two to be symmetrical between gpio_set() and gpio_clear()
 
         edge_delay = 1e-3  # 1 ms
-        edge_diffs = [x - edge_delay for x in edge_diffs_with_delay]
+        edge_diffs = [x - edge_delay for x in edge_diffs_with_delay if (x-edge_delay > 0)]
 
         return self._calc_statistical_properties(edge_diffs)
 
