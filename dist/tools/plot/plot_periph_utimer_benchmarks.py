@@ -42,10 +42,22 @@ class FigurePlotter:
             self.board
         ))
 
+    def _save_figure_as_html(self, fig, title):
+        outfile = "{}/{}.html".format(self.outdir, title)
+        fig.write_html(
+            outfile,
+            full_html=True,
+            include_plotlyjs=True,
+        )
+
+        LOG.info("Wrote figure: {}".format(outfile))
+
     def plot_gpio_latency(self):
+        BENCH_NAME = 'bench_gpio_latency'
+
         # Combine trace samples
         durations = []
-        for traceset_json in self.benchmarks['Measure GPIO Latency']['bench_gpio_latency']:
+        for traceset_json in self.benchmarks['Measure GPIO Latency'][BENCH_NAME]:
             traceset = json.loads(traceset_json.replace("'", "\""))
             durations = durations + traceset['values']
 
@@ -57,7 +69,8 @@ class FigurePlotter:
             'mean': np.mean(durations),
             'stdev': np.std(durations),
             'samples': len(durations)
-        }
+    }
+        LOG.info("GPIO Latency: {}".format(stats))
 
         # Generate box plot
         fig = px.box(
@@ -72,8 +85,7 @@ class FigurePlotter:
             xaxis_title="Board",
         )
 
-        fig.show()
-        LOG.info("GPIO Latency: {}".format(stats))
+        self._save_figure_as_html(fig, BENCH_NAME)
 
 
 def main():
