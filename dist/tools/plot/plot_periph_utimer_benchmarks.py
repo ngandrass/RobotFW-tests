@@ -31,9 +31,13 @@ class FigurePlotter:
         for benchmark in testsuite['testcase']:
             props = {}
             for property in benchmark['properties']['property']:
-                if property['@name'] not in props:
-                    props[property['@name']] = []
-                props[property['@name']].append(property['@value'])
+                try:
+                    if property['@name'] not in props:
+                        props[property['@name']] = []
+                    props[property['@name']].append(property['@value'])
+                except TypeError:
+                    pass  # Failed tests have empty props
+
             self.benchmarks[benchmark['@name']] = props
 
         # Determine metadata
