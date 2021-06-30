@@ -88,12 +88,13 @@ class FigurePlotter:
             data_frame=pd.DataFrame({self.board: durations}),
             points="outliers"
         )
-
         fig.update_layout(
             title="GPIO Latency",
             yaxis_title="Execution time",
             yaxis_ticksuffix="s",
             xaxis_title="Board",
+            xaxis_showgrid=True,
+            yaxis_showgrid=True
         )
 
         self._save_figure_as_html(fig, BENCH_NAME)
@@ -123,7 +124,9 @@ class FigurePlotter:
             title="Timer Read and Write Operations - Board: {}".format(self.board),
             yaxis_title="Execution time",
             yaxis_ticksuffix="s",
-            xaxis_title="Operation (via API)"
+            xaxis_title="Operation (via API)",
+            xaxis_showgrid=True,
+            yaxis_showgrid=True
         )
         self._save_figure_as_html(fig, "bench_timer_read_write")
 
@@ -154,7 +157,7 @@ class FigurePlotter:
             ))
 
         # Plot timeout latencies
-        data = pd.DataFrame(data={float(x['timeout']): x['latencies'] for x in timeouts})
+        data = pd.DataFrame(data={si_format(x['timeout'], precision=0): x['latencies'] for x in timeouts})
         fig = px.box(data_frame=data, points="outliers")
 #        fig.add_trace(go.Scatter(
 #            x=[str(x['timeout']) for x in timeouts],
@@ -166,9 +169,50 @@ class FigurePlotter:
             yaxis_title="Timeout Latency",
             yaxis_ticksuffix="s",
             xaxis_title="Timeout Length",
-            xaxis_ticksuffix="s"
+            xaxis_ticksuffix="s",
+            xaxis_showgrid=True,
+            yaxis_showgrid=True
         )
         self._save_figure_as_html(fig, "bench_absolute_timeouts_grouped_by_freq_{:.0f}".format(freq))
+
+    def plot_absolute_timeouts_grouped_by_timeout(self, timeout):
+        # Read, combine and process trace samples
+        timeouts = []
+        for case, data in self.benchmarks.items():
+            if case.startswith('Benchmark Absolute Timeouts'):
+                case_timeout = int(data['ticks'][0])/int(data['frequency'][0])
+                if case_timeout == timeout:
+                        timeouts.append({
+                            'frequency': int(data['frequency'][0]),
+                            'ticks': int(data['ticks'][0]),
+                            'timeout': case_timeout,
+                            'durations': self._extract_bench_values_from_json(data['bench_absolute_timeouts'])
+                        })
+
+        # Calculate timeout latency
+        for sampleset in timeouts:
+            sampleset['latencies'] = [x - sampleset['timeout'] for x in sampleset['durations']]
+            sampleset['avg_latency'] = [np.average(sampleset['latencies'][0])]
+
+            LOG.info("Absolute Timeout Latency ({}@{}Hz): {}".format(
+                sampleset['ticks'],
+                si_format(sampleset['frequency']),
+                self._calc_statistical_properties(sampleset['latencies'])
+            ))
+
+        # Plot timeout latencies
+        data = pd.DataFrame(data={si_format(x['frequency'], precision=0): x['latencies'] for x in timeouts})
+        fig = px.box(data_frame=data, points="outliers")
+        fig.update_layout(
+            title="Absolute Timeouts - Board: {}, Timeout Period: {}s".format(self.board, si_format(timeout)),
+            yaxis_title="Timeout Latency",
+            yaxis_ticksuffix="s",
+            xaxis_title="Timer Frequency",
+            xaxis_ticksuffix="Hz",
+            xaxis_showgrid=True,
+            yaxis_showgrid=True
+        )
+        self._save_figure_as_html(fig, "bench_absolute_timeouts_grouped_by_timeout_{}s".format(si_format(timeout)))
 
 
 def main():
@@ -196,6 +240,13 @@ def main():
     plotter.plot_absolute_timeouts_grouped_by_freq(freq=10e5)
     plotter.plot_absolute_timeouts_grouped_by_freq(freq=10e4)
     plotter.plot_absolute_timeouts_grouped_by_freq(freq=10e3)
+    plotter.plot_absolute_timeouts_grouped_by_timeout(timeout=1e-6)
+    plotter.plot_absolute_timeouts_grouped_by_timeout(timeout=1e-5)
+    plotter.plot_absolute_timeouts_grouped_by_timeout(timeout=1e-4)
+    plotter.plot_absolute_timeouts_grouped_by_timeout(timeout=1e-3)
+    plotter.plot_absolute_timeouts_grouped_by_timeout(timeout=1e-2)
+    plotter.plot_absolute_timeouts_grouped_by_timeout(timeout=1e-1)
+    plotter.plot_absolute_timeouts_grouped_by_timeout(timeout=1e-0)
 
 
 if __name__ == "__main__":
