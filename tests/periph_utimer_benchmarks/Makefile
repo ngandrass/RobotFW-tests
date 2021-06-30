@@ -1,5 +1,8 @@
 include ../Makefile.tests_common
 
+HIL_CMD_TIMEOUT = 5	# seconds
+HIL_RESET_WAIT = 0.5  	# seconds
+
 USEMODULE += shell
 USEMODULE += periph_utimer
 FEATURES_REQUIRED += periph_gpio
