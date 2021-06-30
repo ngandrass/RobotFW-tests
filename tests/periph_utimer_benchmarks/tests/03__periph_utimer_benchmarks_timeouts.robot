@@ -36,33 +36,95 @@ Benchmark Absolute Timeouts
 *** Test Cases ***
 
 ###################
+## 1 us Timeouts ##
+###################
+
+Benchmark Absolute Timeouts 10@10MHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   10      50
+
+####################
+## 10 us Timeouts ##
+####################
+
+Benchmark Absolute Timeouts 100@10MHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   100     50
+
+Benchmark Absolute Timeouts 10@1MHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    10      50
+
+#####################
+## 100 us Timeouts ##
+#####################
+
+Benchmark Absolute Timeouts 1000@10MHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   1000    50
+
+Benchmark Absolute Timeouts 100@1MHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    100     50
+
+Benchmark Absolute Timeouts 10@100kHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     10      50
+
+###################
 ## 1 ms Timeouts ##
 ###################
 
-Benchmark Absolute Timeouts 10000@10MHz 1ms
+Benchmark Absolute Timeouts 10000@10MHz
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   10000   50
 
-Benchmark Absolute Timeouts 1000@1MHz 1ms
+Benchmark Absolute Timeouts 1000@1MHz
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    1000    50
 
-Benchmark Absolute Timeouts 100@100kHz 1ms
+Benchmark Absolute Timeouts 100@100kHz
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     100     50
 
-Benchmark Absolute Timeouts 10@10kHz 1ms
+Benchmark Absolute Timeouts 10@10kHz
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000      10      50
+
+####################
+## 10 ms Timeouts ##
+####################
+
+Benchmark Absolute Timeouts 100000@10MHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   100000  50
+
+Benchmark Absolute Timeouts 10000@1MHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    10000   50
+
+Benchmark Absolute Timeouts 1000@100kHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     1000    50
+
+Benchmark Absolute Timeouts 100@10kHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000      100     50
 
 #####################
 ## 100 ms Timeouts ##
 #####################
 
-Benchmark Absolute Timeouts 1000000@10MHz 100ms
+Benchmark Absolute Timeouts 1000000@10MHz
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   1000000     50
 
-Benchmark Absolute Timeouts 100000@1MHz 100ms
+Benchmark Absolute Timeouts 100000@1MHz
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    100000      50
 
-Benchmark Absolute Timeouts 10000@100kHz 100ms
+Benchmark Absolute Timeouts 10000@100kHz
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     10000       50
 
-Benchmark Absolute Timeouts 1000@10kHz 100ms
+Benchmark Absolute Timeouts 1000@10kHz
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000      1000        50
+
+##################
+## 1 s Timeouts ##
+##################
+
+Benchmark Absolute Timeouts 10000000@10MHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   10000000    50
+
+Benchmark Absolute Timeouts 1000000@1MHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    1000000     50
+
+Benchmark Absolute Timeouts 100000@100kHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     100000      50
+
+Benchmark Absolute Timeouts 10000@10kHz
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000      10000       50
