@@ -147,6 +147,12 @@ class FigurePlotter:
             sampleset['latencies'] = [x - sampleset['timeout'] for x in sampleset['durations']]
             sampleset['avg_latency'] = [np.average(sampleset['latencies'][0])]
 
+            LOG.info("Absolute Timeout Latency ({}@{}Hz): {}".format(
+                sampleset['ticks'],
+                si_format(sampleset['frequency']),
+                self._calc_statistical_properties(sampleset['latencies'])
+            ))
+
         # Plot timeout latencies
         data = pd.DataFrame(data={float(x['timeout']): x['latencies'] for x in timeouts})
         fig = px.box(data_frame=data, points="outliers")
