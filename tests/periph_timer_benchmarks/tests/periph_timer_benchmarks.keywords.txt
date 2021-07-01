@@ -1,0 +1,32 @@
+*** Settings ***
+Library             PeriphTimerBenchmarks  port=%{PORT}  baudrate=%{BAUD}  timeout=${%{HIL_CMD_TIMEOUT}}  connect_wait=${%{HIL_CONNECT_WAIT}}  parser=json
+
+Resource            api_shell.keywords.txt
+Resource            philip.keywords.txt
+
+*** Variables ***
+${TEST_REPEAT_TIMES}    3  # Number of times a single benchmark test case is repeated by default
+
+*** Keywords ***
+# reset application and check DUT has correct firmware, skip all tests on error
+Default Suite Setup
+    RIOT Reset
+    PHILIP Reset
+    API Firmware Data Should Match
+
+# reset application before running any test
+Default Test Setup
+    RIOT Reset
+    PHILIP Reset
+    API Sync Shell
+
+# Teardown each test
+Default Test Teardown
+    No Operation
+#    RIOT Reset
+#    PHILIP Reset
+
+# Setup a benchmark
+Default Benchmark Setup
+    RIOT Reset
+    PHILIP Reset
