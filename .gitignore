@@ -21,6 +21,8 @@ cachegrind.out*
 .cproject
 .settings
 .idea
+# IntelliJ
+*.iml
 # KDevelop4 project files
 .kdev4
 *.kdev4
