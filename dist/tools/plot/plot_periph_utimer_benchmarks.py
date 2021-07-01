@@ -121,15 +121,18 @@ class FigurePlotter:
         durations = durations + [('periph_utimer', 'Write (uAPI)', x) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Write']['bench_timer_write_uapi'])]
         durations = durations + [('periph_utimer', 'Write (hAPI)', x) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Write']['bench_timer_write_hapi'])]
         durations = durations + [('periph_timer',  'Read',         x) for x in self._extract_bench_values_from_json(self.benchmarks['timer']['Benchmark Timer Read']['bench_timer_read'])]
+        df = pd.DataFrame(durations, columns=['api', 'operation', 'duration'])
 
-        #LOG.info("Benchmark uAPI Timer Read: {}".format(self._calc_statistical_properties(durations['periph_utimer']['Read (uAPI)'])))
-        #LOG.info("Benchmark hAPI Timer Read: {}".format(self._calc_statistical_properties(durations['periph_utimer']['Read (hAPI)'])))
-        #LOG.info("Benchmark uAPI Timer Write: {}".format(self._calc_statistical_properties(durations['periph_utimer']['Write (uAPI)'])))
-        #LOG.info("Benchmark uAPI Timer Write: {}".format(self._calc_statistical_properties(durations['periph_utimer']['Write (uAPI)'])))
-        #LOG.info("Benchmark periph_timer Read: {}".format(self._calc_statistical_properties(durations['periph_timer']['Read'])))
+        # Calc statistical properties
+        for api in df['api'].unique():
+            for operation in df[df['api'] == api]['operation'].unique():
+                LOG.info("Benchmark {} - {}: {}".format(
+                    api,
+                    operation,
+                    self._calc_statistical_properties(df[(df['api'] == api) & (df['operation'] == operation)]['duration'])
+                ))
 
         # Generate plot
-        df = pd.DataFrame(durations, columns=['api', 'operation', 'duration'])
         fig = go.Figure()
         fig.add_box(x=df[df['api'] == 'periph_utimer']['operation'], y=df[df['api'] == 'periph_utimer']['duration'], name="periph_utimer")
         fig.add_box(x=df[df['api'] == 'periph_timer']['operation'], y=df[df['api'] == 'periph_timer']['duration'], name="periph_timer")
@@ -163,6 +166,16 @@ class FigurePlotter:
                                 })
 
         df = pd.DataFrame(timeouts)
+
+        # Calculate statistical properties
+        for api in df['api'].unique():
+            for timeout in df[df['api'] == api]['timeout'].unique():
+                LOG.info("Benchmark Absolute Timeouts {} - {}s @ {}Hz: {}".format(
+                    api,
+                    si_format(timeout, precision=0),
+                    si_format(freq, precision=0),
+                    self._calc_statistical_properties(df[(df['api'] == api) & (df['timeout'] == timeout)]['latency'])
+                ))
 
         # Plot timeout latencies
         fig = px.box(
@@ -202,6 +215,16 @@ class FigurePlotter:
                             })
 
         df = pd.DataFrame(timeouts)
+
+        # Calculate statistical properties
+        for api in df['api'].unique():
+            for frequency in df[df['api'] == api]['frequency'].unique():
+                LOG.info("Benchmark Absolute Timeouts {} - {}s @ {}Hz: {}".format(
+                    api,
+                    si_format(timeout, precision=0),
+                    si_format(frequency, precision=0),
+                    self._calc_statistical_properties(df[(df['api'] == api) & (df['frequency'] == frequency)]['latency'])
+                ))
 
         # Plot timeout latencies
         fig = px.box(
