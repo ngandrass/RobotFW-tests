@@ -60,8 +60,14 @@
  */
 #define REPEAT_10(X) X; X; X; X; X; X; X; X; X; X;
 
-#define F_CPU                   MHZ(80)  /**< Main CPU clock frequency */
-#define INSTRUCTIONS_PER_SPIN   5        /**< Number of instructions consumed by a single spin operation */
+// nucleo-l476rg
+//#define F_CPU                   MHZ(80)  /**< Main CPU clock frequency */
+//#define INSTRUCTIONS_PER_SPIN   4        /**< Number of instructions consumed by a single spin operation */
+
+// nucleo-f070rb
+#define F_CPU                   MHZ(48)  /**< Main CPU clock frequency */
+#define INSTRUCTIONS_PER_SPIN   7        /**< Number of instructions consumed by a single spin operation */
+
 #define CYCLES_PER_SEC          (F_CPU / INSTRUCTIONS_PER_SPIN)
 #define CYCLES_PER_MSEC         (CYCLES_PER_SEC / 1000)
 #define CYCLES_PER_USEC         (CYCLES_PER_MSEC / 1000)
