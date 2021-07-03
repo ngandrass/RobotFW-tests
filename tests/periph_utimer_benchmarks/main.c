@@ -27,6 +27,7 @@
 #include "irq.h"
 #include "shell.h"
 #include "test_helpers.h"
+#include "macros/units.h"
 #include "periph/gpio.h"
 #include "periph/utimer.h"
 
@@ -60,13 +61,24 @@
  */
 #define REPEAT_10(X) X; X; X; X; X; X; X; X; X; X;
 
-// nucleo-l476rg
-//#define F_CPU                   MHZ(80)  /**< Main CPU clock frequency */
-//#define INSTRUCTIONS_PER_SPIN   4        /**< Number of instructions consumed by a single spin operation */
+#ifdef CONFIG_BOARD_NUCLEO_L476RG
+#define F_CPU                   MHZ(80)
+#define INSTRUCTIONS_PER_SPIN   4
+#endif
 
-// nucleo-f070rb
-#define F_CPU                   MHZ(48)  /**< Main CPU clock frequency */
-#define INSTRUCTIONS_PER_SPIN   7        /**< Number of instructions consumed by a single spin operation */
+#ifdef CONFIG_BOARD_NUCLEO_F070RB
+#define F_CPU                   MHZ(48)
+#define INSTRUCTIONS_PER_SPIN   7
+#endif
+
+#ifdef CONFIG_BOARD_ESP32_WROOM_32
+#define F_CPU                   MHZ(80)
+#define INSTRUCTIONS_PER_SPIN   5
+#endif
+
+#if (!defined(F_CPU) || !defined(INSTRUCTIONS_PER_SPIN))
+#error Board clock parameters not specified!
+#endif
 
 #define CYCLES_PER_SEC          (F_CPU / INSTRUCTIONS_PER_SPIN)
 #define CYCLES_PER_MSEC         (CYCLES_PER_SEC / 1000)
