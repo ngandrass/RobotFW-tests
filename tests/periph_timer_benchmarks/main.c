@@ -63,7 +63,7 @@
 
 #ifdef CONFIG_BOARD_NUCLEO_L476RG
 #define F_CPU                   MHZ(80)
-#define INSTRUCTIONS_PER_SPIN   4
+#define INSTRUCTIONS_PER_SPIN   5
 #endif
 
 #ifdef CONFIG_BOARD_NUCLEO_F070RB
