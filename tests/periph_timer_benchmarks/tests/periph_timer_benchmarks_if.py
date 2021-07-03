@@ -16,7 +16,6 @@ class PeriphTimerBenchmarksIf(DutShell):
     """Interface to the a node with periph_timer_benchmarks firmware."""
 
     FW_ID = 'periph_timer_benchmarks'
-    GPIO_OVERHEAD_SECONDS = 120 * 1e-9  # 120 ns on STM32L476RG
 
     # Benchmark calls
     def bench_gpio_latency(self):
@@ -56,9 +55,6 @@ class PeriphTimerBenchmarksIf(DutShell):
         # Scale down from 10-times repeated instruction
         read_durations = [x/10 for x in read_durations]
 
-        # Remove GPIO overhead
-        read_durations = self._remove_gpio_overhead_from_diffs(read_durations)
-
         return self._calc_statistical_properties(read_durations)
 
     def bench_absolute_timeout(self, freq, ticks):
@@ -77,7 +73,6 @@ class PeriphTimerBenchmarksIf(DutShell):
             x['source'] == "DUT_IC" and
             x['event'] == "FALLING"
         ]
-        timeout_durations = self._remove_gpio_overhead_from_diffs(timeout_durations)
 
         return self._calc_statistical_properties(timeout_durations)
 
@@ -94,9 +89,6 @@ class PeriphTimerBenchmarksIf(DutShell):
         ]
 
     # Helper functions
-    def _remove_gpio_overhead_from_diffs(self, trace_diffs):
-        return [(x-self.GPIO_OVERHEAD_SECONDS) for x in trace_diffs]
-
     @staticmethod
     def _calc_statistical_properties(data):
         return {

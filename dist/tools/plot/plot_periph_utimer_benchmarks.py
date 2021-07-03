@@ -27,6 +27,8 @@ class FigurePlotter:
         self.board = self.benchmarks['utimer']['Record Metadata']['board'][0]
         self.riot_version = self.benchmarks['utimer']['Record Metadata']['riot_version'][0]
 
+        raise ImportError("TODO: Remove board specific GPIO overhead before evaluating and plotting!!!")
+
     def _parse_xunit(self, xunit_file, testsuite_name):
         # Parse xUnit file
         with open(xunit_file) as fd:
