@@ -222,9 +222,16 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
     _bench_setup(ENABLE_IRQs);
 
     // Initialize timer and callback
-    timer_init(BENCH_TIMER_DEV, freq, &_bench_absolute_timeouts_cb, NULL);
+    if (timer_init(BENCH_TIMER_DEV, freq, &_bench_absolute_timeouts_cb, NULL) != 0) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
     timer_stop(BENCH_TIMER_DEV);
-    timer_set(BENCH_TIMER_DEV, 0, timeout);
+
+    if (timer_set(BENCH_TIMER_DEV, 0, timeout) != 0) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
 
     // Execute timeout by starting timer and setting GPIO_IC
     timer_start(BENCH_TIMER_DEV);

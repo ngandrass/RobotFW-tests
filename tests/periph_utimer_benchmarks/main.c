@@ -341,9 +341,16 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
     }
 
     // Initialize timer and callback
-    utimer_init(&tim, freq, UTIM_CLK_DEFAULT, false, &_bench_absolute_timeouts_cb, NULL);
+    if (utimer_init(&tim, freq, UTIM_CLK_DEFAULT, false, &_bench_absolute_timeouts_cb, NULL) != 0) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
     utimer_write(&tim, 0);
-    utimer_set(&tim, 0, timeout);
+
+    if (utimer_set(&tim, 0, timeout) != 0) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
 
     // Execute timeout by starting timer and setting GPIO_IC
     utimer_start(&tim);
