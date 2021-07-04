@@ -140,7 +140,6 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
 
     _bench_setup(DISABLE_IRQs);
 
-    // Generate consecutive rising edges
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
         spin(1 * CYCLES_PER_MSEC);
@@ -380,6 +379,69 @@ int cmd_get_metadata(int argc, char **argv) {
     return 0;
 }
 
+/**
+ * @brief   Routine to calibrate time consumed by spin() function.
+ *
+ * Generate rising and falling edges every 1000 spin iterations. The elapsed
+ * time can be used to determine INSTRUCTIONS_PER_SPIN parameter.
+ *
+ * Execution time (w/o DEFAULT_BENCH_REPEAT_COUNT):
+ *   - 1000 spins @ 1 MHz = 1 ms
+ *   - 1000 spins @ 1 GHz = 1 us
+ */
+int cmd_calibrate_spin(int argc, char **argv) {
+    (void) argv;
+    (void) argc;
+
+    _bench_setup(DISABLE_IRQs);
+
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        spin(1000);
+        gpio_clear(GPIO_IC);
+        spin(1000);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
+/**
+ * @brief   Spins for argv[1] amount of milliseconds.
+ *
+ * This function is used to verify that F_CPU and INSTRUCTIONS_PER_SPIN are set
+ * correctly for the current board.
+ *
+ * @param argv[1]   Number of milliseconds to spin
+ */
+int cmd_spin_timeout_ms(int argc, char **argv) {
+    // Parse arguments
+    if (sc_args_check(argc, argv, 1, 1, "TIMEOUT_MS") != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned int timeout_ms = 0;
+    if (sc_arg2uint(argv[1], &timeout_ms) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    _bench_setup(ENABLE_IRQs);
+
+    // Do the spin!
+    gpio_set(GPIO_IC);
+    spin(timeout_ms * CYCLES_PER_MSEC);
+    gpio_clear(GPIO_IC);
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
 /* Initialization and shell setup */
 
 static const shell_command_t shell_commands[] = {
@@ -390,6 +452,8 @@ static const shell_command_t shell_commands[] = {
     {"bench_timer_write_hapi", "Benchmarks time consumed by a hAPI timer write", cmd_bench_timer_write_hapi},
     {"bench_absolute_timeout", "Benchmarks absolute timeouts", cmd_bench_absolute_timeouts},
     {"get_metadata", "Get the metadata of the test firmware", cmd_get_metadata},
+    {"calibrate_spin", "Calibrate clk specific board parameters", cmd_calibrate_spin},
+    {"spin_timeout_ms", "Spin for the given amount of milliseconds", cmd_spin_timeout_ms},
     { NULL, NULL, NULL }
 };
 
