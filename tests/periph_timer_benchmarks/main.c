@@ -84,6 +84,8 @@
 #define CYCLES_PER_MSEC         (CYCLES_PER_SEC / 1000)
 #define CYCLES_PER_USEC         (CYCLES_PER_MSEC / 1000)
 
+#define PHILIP_BACKOFF_SPINS    (1 * CYCLES_PER_USEC)  /**< Worst case number of spins PHiLIP needs between two consecutive trace edges */
+
 #define GPIO_IC GPIO_PIN(HIL_DUT_IC_PORT, HIL_DUT_IC_PIN)
 
 #define DISABLE_IRQs    false
@@ -113,7 +115,7 @@ static inline void _bench_setup(bool irqs) {
 
     // Start with GPIO_IC set to low
     gpio_clear(GPIO_IC);
-    spin(10 * CYCLES_PER_MSEC);
+    spin(10 * PHILIP_BACKOFF_SPINS);
 }
 
 /**
@@ -140,7 +142,6 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
 
     _bench_setup(DISABLE_IRQs);
 
-    // Generate consecutive rising edges
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
         spin(1 * CYCLES_PER_MSEC);
@@ -172,7 +173,7 @@ int cmd_bench_timer_read(int argc, char** argv) {
         REPEAT_10(timer_read(BENCH_TIMER_DEV));
         gpio_clear(GPIO_IC);
 
-        spin(1 * CYCLES_PER_MSEC);
+        spin(PHILIP_BACKOFF_SPINS);
     }
 
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);

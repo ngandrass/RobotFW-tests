@@ -84,6 +84,8 @@
 #define CYCLES_PER_MSEC         (CYCLES_PER_SEC / 1000)
 #define CYCLES_PER_USEC         (CYCLES_PER_MSEC / 1000)
 
+#define PHILIP_BACKOFF_SPINS    (1 * CYCLES_PER_USEC)  /**< Worst case number of spins PHiLIP needs between two consecutive trace edges */
+
 #define GPIO_IC GPIO_PIN(HIL_DUT_IC_PORT, HIL_DUT_IC_PIN)
 
 #define DISABLE_IRQs    false
@@ -113,7 +115,7 @@ static inline void _bench_setup(bool irqs) {
 
     // Start with GPIO_IC set to low
     gpio_clear(GPIO_IC);
-    spin(10 * CYCLES_PER_MSEC);
+    spin(10 * PHILIP_BACKOFF_SPINS);
 }
 
 /**
@@ -178,7 +180,7 @@ int cmd_bench_timer_read_uapi(int argc, char** argv) {
         REPEAT_10(utimer_read(&tim));
         gpio_clear(GPIO_IC);
 
-        spin(1 * CYCLES_PER_MSEC);
+        spin(PHILIP_BACKOFF_SPINS);
     }
 
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
@@ -213,7 +215,7 @@ int cmd_bench_timer_read_hapi(int argc, char** argv) {
         REPEAT_10(driver->read(&tim));
         gpio_clear(GPIO_IC);
 
-        spin(1 * CYCLES_PER_MSEC);
+        spin(PHILIP_BACKOFF_SPINS);
     }
 
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
@@ -247,7 +249,7 @@ int cmd_bench_timer_write_uapi(int argc, char** argv) {
         REPEAT_10(utimer_write(&tim, 0x42));
         gpio_clear(GPIO_IC);
 
-        spin(1 * CYCLES_PER_MSEC);
+        spin(PHILIP_BACKOFF_SPINS);
     }
 
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
@@ -282,7 +284,7 @@ int cmd_bench_timer_write_hapi(int argc, char** argv) {
         REPEAT_10(driver->write(&tim, 0x42));
         gpio_clear(GPIO_IC);
 
-        spin(1 * CYCLES_PER_MSEC);
+        spin(PHILIP_BACKOFF_SPINS);
     }
 
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
