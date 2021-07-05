@@ -22,12 +22,27 @@ Measure GPIO Latency
     ${BENCH_GPIO_LATENCY} =     Process Bench GPIO Latency  ${RESULT['data']}
     Record Property             bench_gpio_latency          ${BENCH_GPIO_LATENCY}
 
+Verify Spin Calibration
+    [Arguments]  ${TIMEOUT_MS}
+    Run Keyword                 Default Benchmark Setup
+
+    API Call Should Succeed     Spin Timeous Ms  ${TIMEOUT_MS}
+    Record Property             trace  ${RESULT['data']}
+    Verify Spin Timeout Ms      ${RESULT['data']}  ${TIMEOUT_MS}
+
 *** Test Cases ***
 Record Metadata
     API Call Should Succeed     Get Metadata
     Record Property             board           ${RESULT['data'][0]}
     Record Property             riot_version    ${RESULT['data'][1]}
     Record Property             testsuite       ${RESULT['data'][2]}
+
+Verify Board Parameters
+    Run Keyword  Verify Spin Calibration  1     # ms
+    Run Keyword  Verify Spin Calibration  10    # ms
+    Run Keyword  Verify Spin Calibration  21    # ms
+    Run Keyword  Verify Spin Calibration  42    # ms
+    Run Keyword  Verify Spin Calibration  100   # ms
 
 Measure GPIO Latency
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency
