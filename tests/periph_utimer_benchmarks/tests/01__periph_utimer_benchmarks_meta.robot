@@ -23,12 +23,13 @@ Measure GPIO Latency
     Record Property             bench_gpio_latency          ${BENCH_GPIO_LATENCY}
 
 Verify Spin Calibration
-    [Arguments]  ${TIMEOUT_MS}
+    [Arguments]  ${TIMEOUT_MS}  ${MAX_DIFF_MS}
     Run Keyword                 Default Benchmark Setup
 
-    API Call Should Succeed     Spin Timeous Ms  ${TIMEOUT_MS}
+    API Call Should Succeed     Spin Timeout Ms  ${TIMEOUT_MS}
+    API Call Should Succeed     PHILIP.Read Trace
     Record Property             trace  ${RESULT['data']}
-    Verify Spin Timeout Ms      ${RESULT['data']}  ${TIMEOUT_MS}
+    ${SUCCESS} =                Verify Spin Timeout Ms  ${RESULT['data']}  ${TIMEOUT_MS}  ${MAX_DIFF_MS}
 
 *** Test Cases ***
 Record Metadata
@@ -38,11 +39,11 @@ Record Metadata
     Record Property             testsuite       ${RESULT['data'][2]}
 
 Verify Board Parameters
-    Run Keyword  Verify Spin Calibration  1     # ms
-    Run Keyword  Verify Spin Calibration  10    # ms
-    Run Keyword  Verify Spin Calibration  21    # ms
-    Run Keyword  Verify Spin Calibration  42    # ms
-    Run Keyword  Verify Spin Calibration  100   # ms
+    Run Keyword  Verify Spin Calibration  1     0.01    # ms
+    Run Keyword  Verify Spin Calibration  10    0.01    # ms
+    Run Keyword  Verify Spin Calibration  21    0.01    # ms
+    Run Keyword  Verify Spin Calibration  42    0.1     # ms
+    Run Keyword  Verify Spin Calibration  100   0.1     # ms
 
 Measure GPIO Latency
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency

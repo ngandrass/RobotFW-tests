@@ -130,12 +130,14 @@ class PeriphUTimerBenchmarksIf(DutShell):
         """
         return self.send_cmd('spin_timeout_ms {}'.format(timeout_ms))
 
-    def verify_spin_timeout_ms(self, trace, timeout_ms, max_diff_ms=1e-3):
+    def verify_spin_timeout_ms(self, trace, timeout_ms, max_diff_ms=0.01):
         """Verify that a spin timeout is within accepted time range.
 
         :param trace:       PHiLIP trace data from spin_timeout_ms()
         :param timeout_ms:  Number of milliseconds the DUT spun for
         :param max_diff_ms: Maximum allowed deviation in milliseconds
+
+        :return:    True if spin timeout was within acceptable range
         """
         durations_ms = [x['diff']*1e3 for x in trace if
             x['source'] == "DUT_IC" and
@@ -149,11 +151,13 @@ class PeriphUTimerBenchmarksIf(DutShell):
         if len(durations_ms) > 1:
             raise IndexError("Too many timeout edges found in trace")
 
-        if not (timeout_ms - max_diff_ms) < durations_ms[0] < (timeout_ms + max_diff_ms):
+        if abs(float(durations_ms[0]) - float(timeout_ms)) > float(max_diff_ms):
             raise ValueError("Recorded spin timeout period out of bounds. Expected: {} ms, Actual: {} ms".format(
                 timeout_ms,
                 durations_ms[0]
             ))
+
+        return True
 
 
     def get_command_list(self):
