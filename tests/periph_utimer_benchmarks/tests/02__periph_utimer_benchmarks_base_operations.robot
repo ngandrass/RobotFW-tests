@@ -18,6 +18,8 @@ Benchmark uAPI Timer Read
 
     API Call Should Succeed     Bench Timer Read            uAPI
     API Call Should Succeed     PHILIP.Read Trace
+    Record Property             trace                       ${RESULT['data']}
+
     ${BENCH_TIMER_READ} =       Process Bench Timer Read    ${RESULT['data']}
     Record Property             bench_timer_read_uapi       ${BENCH_TIMER_READ}
 
@@ -26,6 +28,8 @@ Benchmark hAPI Timer Read
 
     API Call Should Succeed     Bench Timer Read            hAPI
     API Call Should Succeed     PHILIP.Read Trace
+    Record Property             trace                       ${RESULT['data']}
+
     ${BENCH_TIMER_READ} =       Process Bench Timer Read    ${RESULT['data']}
     Record Property             bench_timer_read_hapi       ${BENCH_TIMER_READ}
 
@@ -34,14 +38,18 @@ Benchmark uAPI Timer Write
 
     API Call Should Succeed     Bench Timer Write           uAPI
     API Call Should Succeed     PHILIP.Read Trace
+    Record Property             trace                       ${RESULT['data']}
+
     ${BENCH_TIMER_WRITE} =      Process Bench Timer Write   ${RESULT['data']}
     Record Property             bench_timer_write_uapi      ${BENCH_TIMER_WRITE}
 
 Benchmark hAPI Timer Write
     Run Keyword                 Default Benchmark Setup
 
-    API Call Should Succeed     Bench Timer Write            hAPI
+    API Call Should Succeed     Bench Timer Write           hAPI
     API Call Should Succeed     PHILIP.Read Trace
+    Record Property             trace                       ${RESULT['data']}
+
     ${BENCH_TIMER_WRITE} =      Process Bench Timer Read    ${RESULT['data']}
     Record Property             bench_timer_write_hapi      ${BENCH_TIMER_WRITE}
 
