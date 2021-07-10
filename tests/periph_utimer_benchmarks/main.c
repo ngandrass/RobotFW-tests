@@ -293,11 +293,10 @@ int cmd_bench_timer_write_hapi(int argc, char** argv) {
     return 0;
 }
 
-void _bench_absolute_timeouts_cb(void *arg, utim_int_t cause, int channel) {
+void _bench_absolute_timeouts_cb(void *arg, int channel) {
     gpio_clear(GPIO_IC);
 
     (void) arg;
-    (void) cause;
     (void) channel;
 
     return;
@@ -342,7 +341,7 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
     }
 
     // Initialize timer and callback
-    if (utimer_init(&tim, freq, UTIM_CLK_DEFAULT, false, &_bench_absolute_timeouts_cb, NULL) != 0) {
+    if (utimer_init(&tim, freq, UTIM_CLK_DEFAULT, &_bench_absolute_timeouts_cb, NULL, NULL, NULL) != 0) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
     }
