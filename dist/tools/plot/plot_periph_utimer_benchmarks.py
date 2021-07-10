@@ -27,7 +27,11 @@ class FigurePlotter:
         self.board = self.benchmarks['utimer']['Record Metadata']['board'][0]
         self.riot_version = self.benchmarks['utimer']['Record Metadata']['riot_version'][0]
 
-        raise ImportError("TODO: Remove board specific GPIO overhead before evaluating and plotting!!!")
+        self.gpio_latency = {
+            'utimer': self._calc_gpio_latency(self.benchmarks['utimer']['Measure GPIO Latency']['bench_gpio_latency']),
+            'timer': self._calc_gpio_latency(self.benchmarks['timer']['Measure GPIO Latency']['bench_gpio_latency']),
+        }
+        LOG.info("GPIO latencies: {}".format(self.gpio_latency))
 
     def _parse_xunit(self, xunit_file, testsuite_name):
         # Parse xUnit file
@@ -78,6 +82,14 @@ class FigurePlotter:
             'samples': len(dataset)
         }
 
+    def _calc_gpio_latency(self, gpio_latency_bench_data):
+        return self._calc_statistical_properties(
+            self._extract_bench_values_from_json(gpio_latency_bench_data)
+        )['avg']
+
+    def _remove_gpio_overhead(self, overhead: float, durations: list):
+        return [x - overhead for x in durations]
+
     def _save_figure_as_html(self, fig, title):
         outfile = "{}/{}.html".format(self.outdir, title)
         fig.write_html(
@@ -95,6 +107,7 @@ class FigurePlotter:
             'periph_utimer': self._extract_bench_values_from_json(self.benchmarks['utimer']['Measure GPIO Latency'][BENCH_NAME]),
             'periph_timer': self._extract_bench_values_from_json(self.benchmarks['timer']['Measure GPIO Latency'][BENCH_NAME]),
         }
+
         LOG.info("periph_utimer GPIO Latency: {}".format(self._calc_statistical_properties(durations['periph_utimer'])))
         LOG.info("periph_timer GPIO Latency: {}".format(self._calc_statistical_properties(durations['periph_timer'])))
 
@@ -118,11 +131,11 @@ class FigurePlotter:
     def plot_read_write_ops(self):
         # Read, combine and process trace samples
         durations = []
-        durations = durations + [('periph_utimer', 'Read (uAPI)',  x) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Read']['bench_timer_read_uapi'])]
-        durations = durations + [('periph_utimer', 'Read (hAPI)',  x) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Read']['bench_timer_read_hapi'])]
-        durations = durations + [('periph_utimer', 'Write (uAPI)', x) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Write']['bench_timer_write_uapi'])]
-        durations = durations + [('periph_utimer', 'Write (hAPI)', x) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Write']['bench_timer_write_hapi'])]
-        durations = durations + [('periph_timer',  'Read',         x) for x in self._extract_bench_values_from_json(self.benchmarks['timer']['Benchmark Timer Read']['bench_timer_read'])]
+        durations = durations + [('periph_utimer', 'Read (uAPI)',  x) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Read']['bench_timer_read_uapi']))]
+        durations = durations + [('periph_utimer', 'Read (hAPI)',  x) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Read']['bench_timer_read_hapi']))]
+        durations = durations + [('periph_utimer', 'Write (uAPI)', x) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Write']['bench_timer_write_uapi']))]
+        durations = durations + [('periph_utimer', 'Write (hAPI)', x) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Write']['bench_timer_write_hapi']))]
+        durations = durations + [('periph_timer',  'Read',         x) for x in self._remove_gpio_overhead(self.gpio_latency['timer'],  self._extract_bench_values_from_json(self.benchmarks['timer']['Benchmark Timer Read']['bench_timer_read']))]
         df = pd.DataFrame(durations, columns=['api', 'operation', 'duration'])
 
         # Calc statistical properties
@@ -207,6 +220,7 @@ class FigurePlotter:
                     case_timeout = int(data['ticks'][0])/int(data['frequency'][0])
                     if case_timeout == timeout:
                         for duration in self._extract_bench_values_from_json(data['bench_absolute_timeouts']):
+                            duration = duration - self.gpio_latency[api]
                             timeouts.append({
                                 'api': "periph_{}".format(api),
                                 'frequency': int(data['frequency'][0]),
