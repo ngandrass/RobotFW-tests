@@ -53,9 +53,6 @@ class PeriphTimerBenchmarksIf(DutShell):
             x['diff'] < 1e-3
         ]
 
-        # Scale down from 10-times repeated instruction
-        read_durations = [x/10 for x in read_durations]
-
         return self._calc_statistical_properties(read_durations)
 
     def bench_absolute_timeout(self, freq, ticks):

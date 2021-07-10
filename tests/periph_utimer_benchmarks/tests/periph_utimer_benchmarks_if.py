@@ -63,9 +63,6 @@ class PeriphUTimerBenchmarksIf(DutShell):
             x['diff'] < 1e-3
         ]
 
-        # Scale down from 10-times repeated instruction
-        read_durations = [x/10 for x in read_durations]
-
         return self._calc_statistical_properties(read_durations)
 
     def bench_timer_write(self, api):
@@ -94,9 +91,6 @@ class PeriphUTimerBenchmarksIf(DutShell):
             x['event'] == "FALLING" and
             x['diff'] < 1e-3
         ]
-
-        # Scale down from 10-times repeated instruction
-        write_durations = [x/10 for x in write_durations]
 
         return self._calc_statistical_properties(write_durations)
 

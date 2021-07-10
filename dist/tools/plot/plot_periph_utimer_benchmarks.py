@@ -129,13 +129,13 @@ class FigurePlotter:
         self._save_figure_as_html(fig, BENCH_NAME)
 
     def plot_read_write_ops(self):
-        # Read, combine and process trace samples
+        # Read, combine and process trace samples. Remove GPIO overhead and scale down by the repeat factor of 10
         durations = []
-        durations = durations + [('periph_utimer', 'Read (uAPI)',  x) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Read']['bench_timer_read_uapi']))]
-        durations = durations + [('periph_utimer', 'Read (hAPI)',  x) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Read']['bench_timer_read_hapi']))]
-        durations = durations + [('periph_utimer', 'Write (uAPI)', x) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Write']['bench_timer_write_uapi']))]
-        durations = durations + [('periph_utimer', 'Write (hAPI)', x) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Write']['bench_timer_write_hapi']))]
-        durations = durations + [('periph_timer',  'Read',         x) for x in self._remove_gpio_overhead(self.gpio_latency['timer'],  self._extract_bench_values_from_json(self.benchmarks['timer']['Benchmark Timer Read']['bench_timer_read']))]
+        durations = durations + [('periph_utimer', 'Read (uAPI)',  x/10) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Read']['bench_timer_read_uapi']))]
+        durations = durations + [('periph_utimer', 'Read (hAPI)',  x/10) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Read']['bench_timer_read_hapi']))]
+        durations = durations + [('periph_utimer', 'Write (uAPI)', x/10) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Write']['bench_timer_write_uapi']))]
+        durations = durations + [('periph_utimer', 'Write (hAPI)', x/10) for x in self._remove_gpio_overhead(self.gpio_latency['utimer'], self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Write']['bench_timer_write_hapi']))]
+        durations = durations + [('periph_timer',  'Read',         x/10) for x in self._remove_gpio_overhead(self.gpio_latency['timer'],  self._extract_bench_values_from_json(self.benchmarks['timer']['Benchmark Timer Read']['bench_timer_read']))]
         df = pd.DataFrame(durations, columns=['api', 'operation', 'duration'])
 
         # Calc statistical properties
