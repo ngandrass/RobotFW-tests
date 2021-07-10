@@ -59,7 +59,17 @@
  * micro-benchmarks therefore need to be repeated in order to safely capture
  * the elapsed time period. Very short durations can't be measured reliably!
  */
-#define REPEAT_10(X) X; X; X; X; X; X; X; X; X; X;
+#define REPEAT_10(X)    X; X; X; X; X; X; X; X; X; X;
+
+/**
+ * @brief   Repeats a single operation 20 times
+ */
+#define REPEAT_20(X)    REPEAT_10(X); REPEAT_10(X);
+
+/**
+ * @brief   Repeats a single operation 100 times
+ */
+#define REPEAT_100(X)   REPEAT_20(X); REPEAT_20(X); REPEAT_20(X); REPEAT_20(X); REPEAT_20(X);
 
 #ifdef CONFIG_BOARD_NUCLEO_L476RG
 #define F_CPU                   MHZ(80)
@@ -133,8 +143,8 @@ static inline void _bench_teardown(void) {
  * @brief   Benchmarks latency of the GPIO_IC pin
  *
  * The GPIO_IC pin is toggled repeatedly to measure the amount of time consumed
- * by the gpio_set() and gpio_clear() calls. An extra microsecond is added due
- * to PHiLIP backoff-time requirements.
+ * by the gpio_set() and gpio_clear() calls. A 1ms spin between the two GPIO
+ * calls represents a time-measured operation.
  */
 int cmd_bench_gpio_latency(int argc, char **argv) {
     (void) argc;
@@ -146,7 +156,7 @@ int cmd_bench_gpio_latency(int argc, char **argv) {
         gpio_set(GPIO_IC);
         spin(1 * CYCLES_PER_MSEC);
         gpio_clear(GPIO_IC);
-        spin(1 * CYCLES_PER_MSEC);
+        spin(PHILIP_BACKOFF_SPINS);
     }
 
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
@@ -345,6 +355,7 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
     }
+    utimer_stop(&tim);
     utimer_write(&tim, 0);
 
     if (utimer_set(&tim, 0, timeout) != 0) {

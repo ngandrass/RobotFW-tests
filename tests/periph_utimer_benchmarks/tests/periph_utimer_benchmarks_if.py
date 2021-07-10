@@ -27,8 +27,9 @@ class PeriphUTimerBenchmarksIf(DutShell):
         # Extract diffs between edges and remove intermediate wait period from results
         edge_diffs_with_delay = [x['diff'] for x in trace if
             x['source'] == "DUT_IC" and
-            x['diff'] < 1e-2
-        ][2:]  # First value has to diff, cut first two to be symmetrical between gpio_set() and gpio_clear()
+            x['event'] == "FALLING" and
+            1e-9 < x['diff'] < 1e-2
+        ]
 
         edge_delay = 1e-3  # 1 ms
         edge_diffs = [x - edge_delay for x in edge_diffs_with_delay if (x-edge_delay > 0)]
