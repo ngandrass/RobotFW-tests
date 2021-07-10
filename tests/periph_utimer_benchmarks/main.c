@@ -217,12 +217,13 @@ int cmd_bench_timer_read_hapi(int argc, char** argv) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
     }
-    utim_driver_t *driver = tim.driver;
+    const utim_driver_t *const driver = tim.driver;
+    utim_cnt_t (*const f_read)(utim_periph_t *const tim) = driver->read;
 
     // Perform benchmark (hAPI timer read)
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        REPEAT_10(driver->read(&tim));
+        REPEAT_10(f_read(&tim));
         gpio_clear(GPIO_IC);
 
         spin(PHILIP_BACKOFF_SPINS);
@@ -286,12 +287,13 @@ int cmd_bench_timer_write_hapi(int argc, char** argv) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
     }
-    utim_driver_t *driver = tim.driver;
+    const utim_driver_t *driver = tim.driver;
+    void (*const f_write)(utim_periph_t *const tim, utim_cnt_t cnt) = driver->write;
 
     // Perform benchmark (hAPI timer read)
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        REPEAT_10(driver->write(&tim, 0x42));
+        REPEAT_10(f_write(&tim, 0x42));
         gpio_clear(GPIO_IC);
 
         spin(PHILIP_BACKOFF_SPINS);
