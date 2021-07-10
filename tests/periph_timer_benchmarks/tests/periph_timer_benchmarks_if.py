@@ -27,8 +27,9 @@ class PeriphTimerBenchmarksIf(DutShell):
         # Extract diffs between edges and remove intermediate wait period from results
         edge_diffs_with_delay = [x['diff'] for x in trace if
             x['source'] == "DUT_IC" and
-            x['diff'] < 1e-2
-        ][2:]  # First value has to diff, cut first two to be symmetrical between gpio_set() and gpio_clear()
+            x['event'] == "FALLING" and
+            1e-9 < x['diff'] < 1e-2
+        ]
 
         edge_delay = 1e-3  # 1 ms
         edge_diffs = [x - edge_delay for x in edge_diffs_with_delay if (x-edge_delay > 0)]
@@ -80,6 +81,42 @@ class PeriphTimerBenchmarksIf(DutShell):
     def get_metadata(self):
         """Get the metadata of the firmware."""
         return self.send_cmd('get_metadata')
+
+    def spin_timeout_ms(self, timeout_ms):
+        """Let the DUT spin for the given timeout period.
+
+        :param timeout_ms:  Number of milliseconds to spin
+        """
+        return self.send_cmd('spin_timeout_ms {}'.format(timeout_ms))
+
+    def verify_spin_timeout_ms(self, trace, timeout_ms, max_diff_ms=0.01):
+        """Verify that a spin timeout is within accepted time range.
+
+        :param trace:       PHiLIP trace data from spin_timeout_ms()
+        :param timeout_ms:  Number of milliseconds the DUT spun for
+        :param max_diff_ms: Maximum allowed deviation in milliseconds
+
+        :return:    True if spin timeout was within acceptable range
+        """
+        durations_ms = [x['diff']*1e3 for x in trace if
+            x['source'] == "DUT_IC" and
+            x['event'] == "FALLING" and
+            x['diff'] < 1
+        ]
+
+        if len(durations_ms) == 0:
+            raise IndexError("No matching timeout edge found in trace")
+
+        if len(durations_ms) > 1:
+            raise IndexError("Too many timeout edges found in trace")
+
+        if abs(float(durations_ms[0]) - float(timeout_ms)) > float(max_diff_ms):
+            raise ValueError("Recorded spin timeout period out of bounds. Expected: {} ms, Actual: {} ms".format(
+                timeout_ms,
+                durations_ms[0]
+            ))
+
+        return True
 
     def get_command_list(self):
         """List of all commands."""

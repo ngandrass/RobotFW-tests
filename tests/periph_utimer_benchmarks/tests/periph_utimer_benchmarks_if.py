@@ -160,7 +160,6 @@ class PeriphUTimerBenchmarksIf(DutShell):
 
         return True
 
-
     def get_command_list(self):
         """List of all commands."""
         return [

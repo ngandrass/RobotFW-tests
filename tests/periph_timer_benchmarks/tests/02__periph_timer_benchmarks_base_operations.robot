@@ -18,6 +18,8 @@ Benchmark Timer Read
 
     API Call Should Succeed     Bench Timer Read
     API Call Should Succeed     PHILIP.Read Trace
+    Record Property             trace                       ${RESULT['data']}
+
     ${BENCH_TIMER_READ} =       Process Bench Timer Read    ${RESULT['data']}
     Record Property             bench_timer_read            ${BENCH_TIMER_READ}
 

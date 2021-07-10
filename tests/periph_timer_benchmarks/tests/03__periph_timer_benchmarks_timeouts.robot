@@ -27,6 +27,8 @@ Benchmark Absolute Timeouts
 
     # Evaluate
     API Call Should Succeed     PHILIP.Read Trace
+    Record Property             trace  ${RESULT['data']}
+
     ${BENCH_RESULT} =           Process Bench Absolute Timeout  ${RESULT['data']}
     Record Property             frequency                       ${FREQ}
     Record Property             ticks                           ${TICKS}
