@@ -376,6 +376,9 @@ int cmd_get_metadata(int argc, char **argv) {
     print_data_str(PARSER_DEV_NUM, RIOT_BOARD);
     print_data_str(PARSER_DEV_NUM, RIOT_VERSION);
     print_data_str(PARSER_DEV_NUM, RIOT_APPLICATION);
+    print_data_int(PARSER_DEV_NUM, F_CPU);
+    print_data_int(PARSER_DEV_NUM, INSTRUCTIONS_PER_SPIN);
+    print_data_int(PARSER_DEV_NUM, PHILIP_BACKOFF_SPINS);
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
 
     return 0;

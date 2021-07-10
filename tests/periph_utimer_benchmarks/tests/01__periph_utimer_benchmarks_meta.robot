@@ -34,9 +34,12 @@ Verify Spin Calibration
 *** Test Cases ***
 Record Metadata
     API Call Should Succeed     Get Metadata
-    Record Property             board           ${RESULT['data'][0]}
-    Record Property             riot_version    ${RESULT['data'][1]}
-    Record Property             testsuite       ${RESULT['data'][2]}
+    Record Property             board                   ${RESULT['data'][0]}
+    Record Property             riot_version            ${RESULT['data'][1]}
+    Record Property             testsuite               ${RESULT['data'][2]}
+    Record Property             freq_cpu                ${RESULT['data'][3]}
+    Record Property             instructions_per_spin   ${RESULT['data'][4]}
+    Record Property             philip_backoff_spins    ${RESULT['data'][5]}
 
 Verify Board Parameters
     Run Keyword  Verify Spin Calibration  1     0.01    # ms
