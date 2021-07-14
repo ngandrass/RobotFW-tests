@@ -192,6 +192,60 @@ int cmd_bench_timer_read(int argc, char** argv) {
     return 0;
 }
 
+/**
+ * @brief   Benchmarks time consumed by 10 timer set operations
+ *
+ * During timer set the GPIO_IC pin is pulled high and gets released
+ * immediately after the last call returns.
+ */
+int cmd_bench_timer_set(int argc, char** argv) {
+    (void) argc;
+    (void) argv;
+
+    _bench_setup(DISABLE_IRQs);
+
+    // Perform benchmark
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        REPEAT_10(timer_set_absolute(BENCH_TIMER_DEV, 0, 0x42));
+        gpio_clear(GPIO_IC);
+
+        spin(PHILIP_BACKOFF_SPINS);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
+/**
+ * @brief   Benchmarks time consumed by 10 timer clear operations
+ *
+ * During timer clear the GPIO_IC pin is pulled high and gets released
+ * immediately after the last call returns.
+ */
+int cmd_bench_timer_clear(int argc, char** argv) {
+    (void) argc;
+    (void) argv;
+
+    _bench_setup(DISABLE_IRQs);
+
+    // Perform benchmark
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        REPEAT_10(timer_clear(BENCH_TIMER_DEV, 0));
+        gpio_clear(GPIO_IC);
+
+        spin(PHILIP_BACKOFF_SPINS);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
 void _bench_absolute_timeouts_cb(void *arg, int channel) {
     gpio_clear(GPIO_IC);
 
@@ -343,6 +397,8 @@ int cmd_spin_timeout_ms(int argc, char **argv) {
 static const shell_command_t shell_commands[] = {
     {"bench_gpio_latency", "Benchmarks latency of GPIO_DUT_IC", cmd_bench_gpio_latency},
     {"bench_timer_read", "Benchmarks time consumed by a timer read", cmd_bench_timer_read},
+    {"bench_timer_set", "Benchmarks time consumed by a timer set", cmd_bench_timer_set},
+    {"bench_timer_clear", "Benchmarks time consumed by a timer clear", cmd_bench_timer_clear},
     {"bench_absolute_timeout", "Benchmarks absolute timeouts", cmd_bench_absolute_timeouts},
     {"get_metadata", "Get the metadata of the test firmware", cmd_get_metadata},
     {"calibrate_spin", "Calibrate clk specific board parameters", cmd_calibrate_spin},

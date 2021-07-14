@@ -55,6 +55,44 @@ class PeriphTimerBenchmarksIf(DutShell):
 
         return self._calc_statistical_properties(read_durations)
 
+    def bench_timer_set(self):
+        """Execute timer set benchmark."""
+        return self.send_cmd('bench_timer_set')
+
+    def process_bench_timer_set(self, trace):
+        """Postprocess trace data from timer set benchmark."""
+
+        # Select benchmark samples from trace
+        edges = trace[2:]
+
+        # Extract timer set durations (time between rising and falling edge)
+        set_durations = [x['diff'] for x in edges if
+            x['source'] == "DUT_IC" and
+            x['event'] == "FALLING" and
+            x['diff'] < 1e-3
+        ]
+
+        return self._calc_statistical_properties(set_durations)
+
+    def bench_timer_clear(self):
+        """Execute timer clear benchmark."""
+        return self.send_cmd('bench_timer_clear')
+
+    def process_bench_timer_clear(self, trace):
+        """Postprocess trace data from timer clear benchmark."""
+
+        # Select benchmark samples from trace
+        edges = trace[2:]
+
+        # Extract timer clear durations (time between rising and falling edge)
+        clear_durations = [x['diff'] for x in edges if
+            x['source'] == "DUT_IC" and
+            x['event'] == "FALLING" and
+            x['diff'] < 1e-3
+        ]
+
+        return self._calc_statistical_properties(clear_durations)
+
     def bench_absolute_timeout(self, freq, ticks):
         """Executes the absolute timeout benchmark.
 

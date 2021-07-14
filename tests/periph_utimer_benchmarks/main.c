@@ -179,6 +179,7 @@ int cmd_bench_timer_read_uapi(int argc, char** argv) {
 
     // Get timer peripheral
     utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    utim_periph_t *const tim_ptr = &tim;
     if (tim.dev == UTIMER_DEV_INVALID) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
@@ -187,7 +188,7 @@ int cmd_bench_timer_read_uapi(int argc, char** argv) {
     // Perform benchmark (uAPI timer read)
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        REPEAT_10(utimer_read(&tim));
+        REPEAT_10(utimer_read(tim_ptr));
         gpio_clear(GPIO_IC);
 
         spin(PHILIP_BACKOFF_SPINS);
@@ -213,6 +214,7 @@ int cmd_bench_timer_read_hapi(int argc, char** argv) {
 
     // Get timer peripheral
     utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    utim_periph_t *const tim_ptr = &tim;
     if (tim.dev == UTIMER_DEV_INVALID) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
@@ -223,7 +225,7 @@ int cmd_bench_timer_read_hapi(int argc, char** argv) {
     // Perform benchmark (hAPI timer read)
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        REPEAT_10(f_read(&tim));
+        REPEAT_10(f_read(tim_ptr));
         gpio_clear(GPIO_IC);
 
         spin(PHILIP_BACKOFF_SPINS);
@@ -249,6 +251,7 @@ int cmd_bench_timer_write_uapi(int argc, char** argv) {
 
     // Get timer peripheral
     utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    utim_periph_t *const tim_ptr = &tim;
     if (tim.dev == UTIMER_DEV_INVALID) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
@@ -257,7 +260,7 @@ int cmd_bench_timer_write_uapi(int argc, char** argv) {
     // Perform benchmark (uAPI timer write)
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        REPEAT_10(utimer_write(&tim, 0x42));
+        REPEAT_10(utimer_write(tim_ptr, 0x42));
         gpio_clear(GPIO_IC);
 
         spin(PHILIP_BACKOFF_SPINS);
@@ -283,6 +286,7 @@ int cmd_bench_timer_write_hapi(int argc, char** argv) {
 
     // Get timer peripheral
     utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    utim_periph_t *const tim_ptr = &tim;
     if (tim.dev == UTIMER_DEV_INVALID) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
@@ -293,7 +297,151 @@ int cmd_bench_timer_write_hapi(int argc, char** argv) {
     // Perform benchmark (hAPI timer read)
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        REPEAT_10(f_write(&tim, 0x42));
+        REPEAT_10(f_write(tim_ptr, 0x42));
+        gpio_clear(GPIO_IC);
+
+        spin(PHILIP_BACKOFF_SPINS);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
+/**
+ * @brief   Benchmarks time consumed by 10 uAPI timer set operations
+ *
+ * During timer set the GPIO_IC pin is pulled high and gets released
+ * immediately after the last call returns.
+ */
+int cmd_bench_timer_set_uapi(int argc, char** argv) {
+    (void) argc;
+    (void) argv;
+
+    _bench_setup(DISABLE_IRQs);
+
+    // Get timer peripheral
+    utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    utim_periph_t *const tim_ptr = &tim;
+    if (tim.dev == UTIMER_DEV_INVALID) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+
+    // Perform benchmark
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        REPEAT_10(utimer_set_absolute(tim_ptr, 0, 0x42));
+        gpio_clear(GPIO_IC);
+
+        spin(PHILIP_BACKOFF_SPINS);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
+/**
+ * @brief   Benchmarks time consumed by 10 hAPI timer set operations
+ *
+ * During timer set the GPIO_IC pin is pulled high and gets released
+ * immediately after the last call returns.
+ */
+int cmd_bench_timer_set_hapi(int argc, char** argv) {
+    (void) argc;
+    (void) argv;
+
+    _bench_setup(DISABLE_IRQs);
+
+    // Get timer peripheral
+    utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    utim_periph_t *const tim_ptr = &tim;
+    if (tim.dev == UTIMER_DEV_INVALID) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+    const utim_driver_t *driver = tim.driver;
+    int (*const f_set_channel)(utim_periph_t *const tim, unsigned int channel, utim_chan_mode_t mode, utim_cnt_t cnt) = driver->set_channel;
+
+    // Perform benchmark
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        REPEAT_10(f_set_channel(tim_ptr, 0, UTIM_CHAN_ONESHOT, 0x42));
+        gpio_clear(GPIO_IC);
+
+        spin(PHILIP_BACKOFF_SPINS);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
+/**
+ * @brief   Benchmarks time consumed by 10 uAPI timer clear operations
+ *
+ * During timer clear the GPIO_IC pin is pulled high and gets released
+ * immediately after the last call returns.
+ */
+int cmd_bench_timer_clear_uapi(int argc, char** argv) {
+    (void) argc;
+    (void) argv;
+
+    _bench_setup(DISABLE_IRQs);
+
+    // Get timer peripheral
+    utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    utim_periph_t *const tim_ptr = &tim;
+    if (tim.dev == UTIMER_DEV_INVALID) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+
+    // Perform benchmark
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        REPEAT_10(utimer_clear(tim_ptr, 0));
+        gpio_clear(GPIO_IC);
+
+        spin(PHILIP_BACKOFF_SPINS);
+    }
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
+/**
+ * @brief   Benchmarks time consumed by 10 hAPI timer clear operations
+ *
+ * During timer clear the GPIO_IC pin is pulled high and gets released
+ * immediately after the last call returns.
+ */
+int cmd_bench_timer_clear_hapi(int argc, char** argv) {
+    (void) argc;
+    (void) argv;
+
+    _bench_setup(DISABLE_IRQs);
+
+    // Get timer peripheral
+    utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    utim_periph_t *const tim_ptr = &tim;
+    if (tim.dev == UTIMER_DEV_INVALID) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+    const utim_driver_t *driver = tim.driver;
+    int (*const f_set_channel)(utim_periph_t *const tim, unsigned int channel, utim_chan_mode_t mode, utim_cnt_t cnt) = driver->set_channel;
+
+    // Perform benchmark
+    for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
+        gpio_set(GPIO_IC);
+        REPEAT_10(f_set_channel(tim_ptr, 0, UTIM_CHAN_DISABLED, 0));
         gpio_clear(GPIO_IC);
 
         spin(PHILIP_BACKOFF_SPINS);
@@ -467,6 +615,10 @@ static const shell_command_t shell_commands[] = {
     {"bench_timer_read_hapi", "Benchmarks time consumed by a hAPI timer read", cmd_bench_timer_read_hapi},
     {"bench_timer_write_uapi", "Benchmarks time consumed by a uAPI timer write", cmd_bench_timer_write_uapi},
     {"bench_timer_write_hapi", "Benchmarks time consumed by a hAPI timer write", cmd_bench_timer_write_hapi},
+    {"bench_timer_set_uapi", "Benchmarks time consumed by a uAPI timer set", cmd_bench_timer_set_uapi},
+    {"bench_timer_set_hapi", "Benchmarks time consumed by a hAPI timer set", cmd_bench_timer_set_hapi},
+    {"bench_timer_clear_uapi", "Benchmarks time consumed by a uAPI timer clear", cmd_bench_timer_clear_uapi},
+    {"bench_timer_clear_hapi", "Benchmarks time consumed by a hAPI timer clear", cmd_bench_timer_clear_hapi},
     {"bench_absolute_timeout", "Benchmarks absolute timeouts", cmd_bench_absolute_timeouts},
     {"get_metadata", "Get the metadata of the test firmware", cmd_get_metadata},
     {"calibrate_spin", "Calibrate clk specific board parameters", cmd_calibrate_spin},

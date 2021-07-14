@@ -94,6 +94,64 @@ class PeriphUTimerBenchmarksIf(DutShell):
 
         return self._calc_statistical_properties(write_durations)
 
+    def bench_timer_set(self, api):
+        """Execute timer set benchmark.
+
+        :param api: API to use ('uAPI' or 'hAPI')
+        """
+        api = str.lower(api)
+
+        if api == 'uapi':
+            return self.send_cmd('bench_timer_set_uapi')
+        elif api == 'hapi':
+            return self.send_cmd('bench_timer_set_hapi')
+        else:
+            raise ValueError("api must be either 'uAPI' or 'hAPI'")
+
+    def process_bench_timer_set(self, trace):
+        """Postprocess trace data from uAPI/hAPI timer set benchmark."""
+
+        # Select benchmark samples from trace
+        edges = trace[2:]
+
+        # Extract timer set durations (time between rising and falling edge)
+        set_durations = [x['diff'] for x in edges if
+            x['source'] == "DUT_IC" and
+            x['event'] == "FALLING" and
+            x['diff'] < 1e-3
+        ]
+
+        return self._calc_statistical_properties(set_durations)
+
+    def bench_timer_clear(self, api):
+        """Execute timer clear benchmark.
+
+        :param api: API to use ('uAPI' or 'hAPI')
+        """
+        api = str.lower(api)
+
+        if api == 'uapi':
+            return self.send_cmd('bench_timer_clear_uapi')
+        elif api == 'hapi':
+            return self.send_cmd('bench_timer_clear_hapi')
+        else:
+            raise ValueError("api must be either 'uAPI' or 'hAPI'")
+
+    def process_bench_timer_clear(self, trace):
+        """Postprocess trace data from uAPI/hAPI timer clear benchmark."""
+
+        # Select benchmark samples from trace
+        edges = trace[2:]
+
+        # Extract timer clear durations (time between rising and falling edge)
+        clear_durations = [x['diff'] for x in edges if
+            x['source'] == "DUT_IC" and
+            x['event'] == "FALLING" and
+            x['diff'] < 1e-3
+        ]
+
+        return self._calc_statistical_properties(clear_durations)
+
     def bench_absolute_timeout(self, freq, ticks):
         """Executes the absolute timeout benchmark.
 
