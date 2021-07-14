@@ -86,6 +86,11 @@
 #define INSTRUCTIONS_PER_SPIN   5
 #endif
 
+#ifdef CONFIG_BOARD_SLSTK3402A
+#define F_CPU                   MHZ(40)
+#define INSTRUCTIONS_PER_SPIN   5
+#endif
+
 #if (!defined(F_CPU) || !defined(INSTRUCTIONS_PER_SPIN))
 #error Board clock parameters not specified!
 #endif
