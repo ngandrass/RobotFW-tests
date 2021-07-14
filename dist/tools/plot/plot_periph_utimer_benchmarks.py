@@ -155,6 +155,40 @@ class FigurePlotter:
         )
         self._save_figure_as_html(fig, "bench_timer_read_write")
 
+    def plot_set_clear_ops(self):
+        # Read, combine and process trace samples. Remove GPIO overhead and scale down by the repeat factor of 10
+        durations = []
+        durations = durations + [('periph_utimer', 'Set (uAPI)',   (x-self.gpio_latency)/10) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Set']['bench_timer_set_uapi'])]
+        durations = durations + [('periph_utimer', 'Set (hAPI)',   (x-self.gpio_latency)/10) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Set']['bench_timer_set_hapi'])]
+        durations = durations + [('periph_utimer', 'Clear (uAPI)', (x-self.gpio_latency)/10) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark uAPI Timer Clear']['bench_timer_clear_uapi'])]
+        durations = durations + [('periph_utimer', 'Clear (hAPI)', (x-self.gpio_latency)/10) for x in self._extract_bench_values_from_json(self.benchmarks['utimer']['Benchmark hAPI Timer Clear']['bench_timer_clear_hapi'])]
+        durations = durations + [('periph_timer',  'Set',          (x-self.gpio_latency)/10) for x in self._extract_bench_values_from_json(self.benchmarks['timer']['Benchmark Timer Set']['bench_timer_set'])]
+        durations = durations + [('periph_timer',  'Clear',        (x-self.gpio_latency)/10) for x in self._extract_bench_values_from_json(self.benchmarks['timer']['Benchmark Timer Clear']['bench_timer_clear'])]
+        df = pd.DataFrame(durations, columns=['api', 'operation', 'duration'])
+
+        # Calc statistical properties
+        for api in df['api'].unique():
+            for operation in df[df['api'] == api]['operation'].unique():
+                LOG.info("Benchmark {} - {}: {}".format(
+                    api,
+                    operation,
+                    self._calc_statistical_properties(df[(df['api'] == api) & (df['operation'] == operation)]['duration'])
+                ))
+
+        # Generate plot
+        fig = go.Figure()
+        fig.add_box(x=df[df['api'] == 'periph_utimer']['operation'], y=df[df['api'] == 'periph_utimer']['duration'], name="periph_utimer")
+        fig.add_box(x=df[df['api'] == 'periph_timer']['operation'], y=df[df['api'] == 'periph_timer']['duration'], name="periph_timer")
+        fig.update_layout(
+            title="Timer Set and Clear Operations - Board: {}".format(self.board),
+            yaxis_title="Execution time",
+            yaxis_ticksuffix="s",
+            xaxis_title="Operation (via API)",
+            xaxis_showgrid=True,
+            yaxis_showgrid=True
+        )
+        self._save_figure_as_html(fig, "bench_timer_set_clear")
+
     def plot_absolute_timeouts_grouped_by_freq(self, freq, ignored_timeouts=[]):
         # Read, combine and process trace samples
         timeouts = []
@@ -282,6 +316,7 @@ def main():
     )
     plotter.plot_gpio_latency()
     plotter.plot_read_write_ops()
+    plotter.plot_set_clear_ops()
     # plotter.plot_absolute_timeouts_grouped_by_freq(freq=10e6, ignored_timeouts=[1, 0.1])
     plotter.plot_absolute_timeouts_grouped_by_freq(freq=10e6)
     plotter.plot_absolute_timeouts_grouped_by_freq(freq=10e5)
