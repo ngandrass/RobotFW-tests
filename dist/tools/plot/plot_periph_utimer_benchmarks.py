@@ -41,7 +41,14 @@ class FigurePlotter:
             board = xunit_data['Record Metadata']['board'][0]
             suite = xunit_data['Record Metadata']['testsuite'][0]
 
+            api = 'UNKNOWN'
+            if suite == self.SUITE_UTIMER:
+                api = 'periph_utimer'
+            elif suite == self.SUITE_TIMER:
+                api = 'periph_timer'
+
             self.benchmarks.setdefault(board, {})[suite] = {
+                'api': api,
                 'riot_version': xunit_data['Record Metadata']['riot_version'][0],
                 'freq_cpu': xunit_data['Record Metadata']['freq_cpu'][0],
                 'instructions_per_spin': xunit_data['Record Metadata']['instructions_per_spin'][0],
@@ -94,11 +101,11 @@ class FigurePlotter:
 
     def _calc_statistical_properties(self, dataset):
         return {
-            'max': np.max(dataset),
-            'min': np.min(dataset),
             'avg': np.average(dataset),
             'mean': np.mean(dataset),
             'stdev': np.std(dataset),
+            'min': np.min(dataset),
+            'max': np.max(dataset),
             'samples': len(dataset)
         }
 
@@ -133,6 +140,10 @@ class FigurePlotter:
 
     def get_boards(self):
         return self.benchmarks.keys()
+
+    #############################
+    ### Board specific plots ####
+    #############################
 
     def plot_board_gpio_latency(self, board):
         # Process samples
@@ -235,14 +246,8 @@ class FigurePlotter:
     def plot_board_absolute_timeouts_grouped_by_freq(self, board, freq, ignored_timeouts=[]):
         # Read, combine and process trace samples
         timeouts = []
-        for testsuite, benchmarks in self.benchmarks[board].items():
-            api = 'UNKNOWN'
-            if testsuite == self.SUITE_TIMER:
-                api = 'timer'
-            elif testsuite == self.SUITE_UTIMER:
-                api = 'utimer'
-
-            for case, data in benchmarks['benchmarks'].items():
+        for testsuite, testsuite_data in self.benchmarks[board].items():
+            for case, data in testsuite_data['benchmarks'].items():
                 if case.startswith('Benchmark Absolute Timeouts'):
                     if not data:
                         continue
@@ -253,7 +258,7 @@ class FigurePlotter:
                             for duration in self._extract_bench_values_from_json(data['bench_absolute_timeouts']):
                                 duration = duration - self._get_gpio_latency(board)
                                 timeouts.append({
-                                    'api': "periph_{}".format(api),
+                                    'api': testsuite_data['api'],
                                     'frequency': int(data['frequency'][0]),
                                     'ticks': int(data['ticks'][0]),
                                     'timeout': timeout,
@@ -299,14 +304,8 @@ class FigurePlotter:
     def plot_board_absolute_timeouts_grouped_by_timeout(self, board, timeout):
         # Read, combine and process trace samples
         timeouts = []
-        for testsuite, benchmarks in self.benchmarks[board].items():
-            api = 'UNKNOWN'
-            if testsuite == self.SUITE_TIMER:
-                api = 'timer'
-            elif testsuite == self.SUITE_UTIMER:
-                api = 'utimer'
-
-            for case, data in benchmarks['benchmarks'].items():
+        for testsuite, testsuite_data in self.benchmarks[board].items():
+            for case, data in testsuite_data['benchmarks'].items():
                 if case.startswith('Benchmark Absolute Timeouts'):
                     if not data:
                         continue
@@ -316,7 +315,7 @@ class FigurePlotter:
                         for duration in self._extract_bench_values_from_json(data['bench_absolute_timeouts']):
                             duration = duration - self._get_gpio_latency(board)
                             timeouts.append({
-                                'api': "periph_{}".format(api),
+                                'api': testsuite_data['api'],
                                 'frequency': int(data['frequency'][0]),
                                 'ticks': int(data['ticks'][0]),
                                 'timeout': case_timeout,
@@ -359,6 +358,62 @@ class FigurePlotter:
         )
         self._save_figure_as_html(fig, "{}_bench_absolute_timeouts_grouped_by_timeout_{}s".format(board, si_format(timeout)))
 
+    ######################
+    ### Overview plots ###
+    ######################
+
+    def plot_gpio_latencies(self):
+        # Process samples into DataFrame
+        durations = []
+        for board, suites in self.benchmarks.items():
+            for suite, data in suites.items():
+                gpio_latencies = self._get_benchmark_data(board, suite, 'Measure GPIO Latency', 'bench_gpio_latency')
+                for duration in gpio_latencies:
+                    durations.append({
+                        'board': board,
+                        'api': data['api'],
+                        'duration': duration
+                    })
+
+                LOG.info("GPIO Latency on board={} for api={}: {}".format(
+                    board,
+                    data['api'],
+                    self._calc_statistical_properties(gpio_latencies))
+                )
+
+        df = pd.DataFrame(durations)
+
+        # Generate box plot
+        fig = px.box(
+            data_frame=df,
+            x='board',
+            y='duration',
+            color='api',
+            points="outliers"
+        )
+        fig.update_traces(marker=dict(opacity=0))  # Detect but hide outliers
+        fig.update_layout(
+            title="GPIO Latency",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.01,
+                xanchor="right",
+                x=0.99
+            ),
+            yaxis_title="Execution time",
+            yaxis_ticksuffix="s",
+            xaxis_title="Board",
+            xaxis_ticksuffix="",
+            xaxis_showgrid=True,
+            yaxis_showgrid=True,
+            autosize=False,
+            width=600,
+            height=500,
+            margin=dict(l=10, r=10, b=10, t=10, pad=1)
+        )
+        self._save_figure_as_html(fig, "overview_gpio_latencies")
+
 
 def main():
     # Configure logging
@@ -382,6 +437,10 @@ def main():
         outdir=args.outdir
     )
 
+    # Overview plots
+    plotter.plot_gpio_latencies()
+
+    # Board specific plots
     for board in plotter.get_boards():
         plotter.plot_board_gpio_latency(board)
         plotter.plot_board_read_write_ops(board)
