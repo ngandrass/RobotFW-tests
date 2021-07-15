@@ -494,15 +494,15 @@ class FigurePlotter:
             si_format(timeout, precision=1)
         ))
 
-    def plot_read_operations(self, convert_to_cpu_cycles=False):
+    def plot_simple_operations(self, op, convert_to_cpu_cycles=False):
         # Process samples into DataFrame
-        read_durations = []
+        op_durations = []
         for board, suites in self.benchmarks.items():
             for suite, suite_data in suites.items():
                 relevant_benchmarks = {
-                    'Benchmark uAPI Timer Read': 'bench_timer_read_uapi',
-                    'Benchmark hAPI Timer Read': 'bench_timer_read_hapi',
-                    'Benchmark Timer Read': 'bench_timer_read'
+                    'Benchmark uAPI Timer '+op: 'bench_timer_'+op.lower()+'_uapi',
+                    'Benchmark hAPI Timer '+op: 'bench_timer_'+op.lower()+'_hapi',
+                    'Benchmark Timer '+op: 'bench_timer_'+op.lower()
                 }
 
                 for bench_name, datavar in relevant_benchmarks.items():
@@ -511,13 +511,13 @@ class FigurePlotter:
                     except KeyError:
                         continue
 
-                    operation = 'UNKNOWN'
-                    if datavar == 'bench_timer_read_uapi':
-                        operation = 'periph_utimer (uAPI)'
-                    elif datavar == 'bench_timer_read_hapi':
-                        operation = 'periph_utimer (hAPI)'
-                    elif datavar == 'bench_timer_read':
-                        operation = 'periph_timer'
+                    op_label = 'UNKNOWN'
+                    if datavar == 'bench_timer_'+op.lower()+'_uapi':
+                        op_label = 'periph_utimer (uAPI)'
+                    elif datavar == 'bench_timer_'+op.lower()+'_hapi':
+                        op_label = 'periph_utimer (hAPI)'
+                    elif datavar == 'bench_timer_'+op.lower():
+                        op_label = 'periph_timer'
 
                     if durations:
                         for duration in durations:
@@ -525,25 +525,25 @@ class FigurePlotter:
                             if convert_to_cpu_cycles:
                                 read_duration = round(read_duration*self.BOARD_F_CPU[board], ndigits=1)
 
-                            read_durations.append({
+                            op_durations.append({
                                 'board': board,
                                 'api': suite_data['api'],
-                                'operation': operation,
+                                'operation': op_label,
                                 'duration': read_duration,
                             })
 
-        if not read_durations:
+        if not op_durations:
             return
 
-        df = pd.DataFrame(read_durations)
+        df = pd.DataFrame(op_durations)
 
         # Calculate statistical properties
         for board in df['board'].unique():
-            for operation in df[df['board'] == board]['operation'].unique():
+            for op_label in df[df['board'] == board]['operation'].unique():
                 LOG.info("Benchmark operation={} on board={}: {}".format(
-                    operation,
+                    "{} {}".format(op_label, op),
                     board,
-                    self._calc_statistical_properties(df[(df['operation'] == operation) & (df['board'] == board)]['duration'])
+                    self._calc_statistical_properties(df[(df['operation'] == op_label) & (df['board'] == board)]['duration'])
                 ))
 
         # Plot timeout latencies
@@ -556,7 +556,7 @@ class FigurePlotter:
         )
         fig.update_traces(marker=dict(opacity=0))  # Detect but hide outliers
         fig.update_layout(
-            title="Timer Read Operations",
+            title="Timer {} Operations".format(op),
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
@@ -572,7 +572,7 @@ class FigurePlotter:
             yaxis_showgrid=True,
             **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
-        self._save_figure_as_html(fig, "overview_read_operations" + ("_cpu_cycles" if convert_to_cpu_cycles else ""))
+        self._save_figure_as_html(fig, "overview_"+op.lower()+"_operations" + ("_cpu_cycles" if convert_to_cpu_cycles else ""))
 
 
 def main():
@@ -599,8 +599,10 @@ def main():
 
     # Overview plots
     plotter.plot_gpio_latencies()
-    plotter.plot_read_operations()
-    plotter.plot_read_operations(convert_to_cpu_cycles=True)
+
+    for operation in ["Read", "Write", "Set", "Clear"]:
+        plotter.plot_simple_operations(operation)
+        plotter.plot_simple_operations(operation, convert_to_cpu_cycles=True)
 
     for freq in [1e7, 1e6, 1e5, 1e4]:
         for ticks in [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9]:
