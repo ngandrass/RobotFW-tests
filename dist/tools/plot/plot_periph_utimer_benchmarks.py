@@ -118,6 +118,7 @@ class FigurePlotter:
             'avg': np.average(dataset),
             'mean': np.mean(dataset),
             'stdev': np.std(dataset),
+            'var': np.var(dataset),
             'min': np.min(dataset),
             'max': np.max(dataset),
             'samples': len(dataset)
@@ -421,6 +422,7 @@ class FigurePlotter:
             xaxis_ticksuffix="",
             xaxis_showgrid=True,
             yaxis_showgrid=True,
+            yaxis_rangemode="tozero",
             **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
         self._save_figure_as_html(fig, "overview_gpio_latencies")
@@ -490,6 +492,7 @@ class FigurePlotter:
             xaxis_ticksuffix="",
             xaxis_showgrid=True,
             yaxis_showgrid=True,
+            yaxis_rangemode="tozero",
             **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
         self._save_figure_as_html(fig, "overview_absolute_timeouts_{}Hz_{}s".format(
@@ -573,6 +576,7 @@ class FigurePlotter:
             xaxis_ticksuffix="",
             xaxis_showgrid=True,
             yaxis_showgrid=True,
+            yaxis_rangemode="tozero",
             **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
         self._save_figure_as_html(fig, "overview_"+op.lower()+"_operations" + ("_cpu_cycles" if convert_to_cpu_cycles else ""))
