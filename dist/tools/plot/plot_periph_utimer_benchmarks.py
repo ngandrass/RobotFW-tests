@@ -20,6 +20,13 @@ LOG = logging.getLogger(__name__)
 
 class FigurePlotter:
 
+    BOARD_F_CPU = {
+        'nucleo-f070rb': 48e6,
+        'nucleo-l476rg': 80e6,
+        'esp32-wroom-32': 80e6,
+        'slstk3402a': 40e6
+    }
+
     XUNIT_FILE_PATTERN = '*xunit.xml'
     XUNIT_TESTSUITE_NAME_PATTERN = r"^tests_periph_(u)?timer_benchmarks$"
 
@@ -487,7 +494,7 @@ class FigurePlotter:
             si_format(timeout, precision=1)
         ))
 
-    def plot_read_operations(self):
+    def plot_read_operations(self, convert_to_cpu_cycles=False):
         # Process samples into DataFrame
         read_durations = []
         for board, suites in self.benchmarks.items():
@@ -514,11 +521,15 @@ class FigurePlotter:
 
                     if durations:
                         for duration in durations:
+                            read_duration = (duration - self._get_gpio_latency(board)) / 10
+                            if convert_to_cpu_cycles:
+                                read_duration = round(read_duration*self.BOARD_F_CPU[board], ndigits=1)
+
                             read_durations.append({
                                 'board': board,
                                 'api': suite_data['api'],
                                 'operation': operation,
-                                'duration': (duration - self._get_gpio_latency(board)) / 10,
+                                'duration': read_duration,
                             })
 
         if not read_durations:
@@ -553,15 +564,15 @@ class FigurePlotter:
                 xanchor="right",
                 x=0.99
             ),
-            yaxis_title="Execution time",
-            yaxis_ticksuffix="s",
+            yaxis_title="Execution time" if not convert_to_cpu_cycles else "CPU cycles",
+            yaxis_ticksuffix="s" if not convert_to_cpu_cycles else "",
             xaxis_title="Board",
             xaxis_ticksuffix="",
             xaxis_showgrid=True,
             yaxis_showgrid=True,
             **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
-        self._save_figure_as_html(fig, "overview_read_operations")
+        self._save_figure_as_html(fig, "overview_read_operations" + ("_cpu_cycles" if convert_to_cpu_cycles else ""))
 
 
 def main():
@@ -589,6 +600,7 @@ def main():
     # Overview plots
     plotter.plot_gpio_latencies()
     plotter.plot_read_operations()
+    plotter.plot_read_operations(convert_to_cpu_cycles=True)
 
     for freq in [1e7, 1e6, 1e5, 1e4]:
         for ticks in [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9]:
