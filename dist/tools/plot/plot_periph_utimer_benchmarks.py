@@ -26,6 +26,13 @@ class FigurePlotter:
     SUITE_TIMER = 'tests_periph_timer_benchmarks'
     SUITE_UTIMER = 'tests_periph_utimer_benchmarks'
 
+    PLOTLY_COMMON_LAYOUT_PROPS = dict(
+        autosize=False,
+        width=600,
+        height=500,
+        margin=dict(l=10, r=10, b=10, t=10, pad=1)
+    )
+
     def __init__(self, indir, outdir):
         self.indir = indir
         self.outdir = outdir
@@ -407,12 +414,78 @@ class FigurePlotter:
             xaxis_ticksuffix="",
             xaxis_showgrid=True,
             yaxis_showgrid=True,
-            autosize=False,
-            width=600,
-            height=500,
-            margin=dict(l=10, r=10, b=10, t=10, pad=1)
+            **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
         self._save_figure_as_html(fig, "overview_gpio_latencies")
+
+    def plot_timeout_latencies(self, freq, ticks):
+        # Determine timeout length
+        timeout = ticks/freq
+
+        # Process samples into DataFrame
+        timeout_durations = []
+        for board, suites in self.benchmarks.items():
+            for suite, suite_data in suites.items():
+                for bench_name, bench_data in suite_data['benchmarks'].items():
+                    if bench_name.startswith('Benchmark Absolute Timeouts'):
+                        if not bench_data:
+                            continue
+
+                        if int(bench_data['frequency'][0]) == freq and int(bench_data['ticks'][0]) == ticks:
+                            durations = self._get_benchmark_data(board, suite, bench_name, 'bench_absolute_timeouts')
+                            for duration in durations:
+                                timeout_durations.append({
+                                    'board': board,
+                                    'api': suite_data['api'],
+                                    'duration': duration - self._get_gpio_latency(board),
+                                    'latency': duration - timeout - self._get_gpio_latency(board)
+                                })
+        if not timeout_durations:
+            return
+
+        df = pd.DataFrame(timeout_durations)
+
+        # Calculate statistical properties
+        for board in df['board'].unique():
+            for api in df[df['board'] == board]['api'].unique():
+                LOG.info("Benchmark Absolute Timeouts (freq={}, ticks={}) on board={} for api={}: {}".format(
+                    int(freq),
+                    int(ticks),
+                    board,
+                    api,
+                    self._calc_statistical_properties(df[(df['api'] == api) & (df['board'] == board)]['latency'])
+                ))
+
+        # Plot timeout latencies
+        fig = px.box(
+            data_frame=df,
+            x='board',
+            y='latency',
+            color='api',
+            points="outliers"
+        )
+        fig.update_traces(marker=dict(opacity=0))  # Detect but hide outliers
+        fig.update_layout(
+            title="Absolute Timeouts - Timer Frequency: {}Hz, Timeout: {}s".format(si_format(freq), si_format(timeout)),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.01,
+                xanchor="right",
+                x=0.99
+            ),
+            yaxis_title="Timeout Latency",
+            yaxis_ticksuffix="s",
+            xaxis_title="Board",
+            xaxis_ticksuffix="",
+            xaxis_showgrid=True,
+            yaxis_showgrid=True,
+            **self.PLOTLY_COMMON_LAYOUT_PROPS
+        )
+        self._save_figure_as_html(fig, "overview_absolute_timeouts_{}Hz_{}s".format(
+            si_format(freq, precision=1),
+            si_format(timeout, precision=1)
+        ))
 
 
 def main():
@@ -439,6 +512,9 @@ def main():
 
     # Overview plots
     plotter.plot_gpio_latencies()
+    for freq in [1e7, 1e6, 1e5, 1e4]:
+        for ticks in [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9]:
+            plotter.plot_timeout_latencies(freq=freq, ticks=ticks)
 
     # Board specific plots
     for board in plotter.get_boards():
