@@ -473,7 +473,10 @@ class FigurePlotter:
         )
         fig.update_traces(marker=dict(opacity=0))  # Detect but hide outliers
         fig.update_layout(
-            title="Absolute Timeouts - Timer Frequency: {}Hz, Timeout: {}s".format(si_format(freq), si_format(timeout)),
+            title=dict(
+                text="Absolute Timeouts - Timer Frequency: {}Hz, Timeout: {}s".format(si_format(freq), si_format(timeout)),
+                y=1
+            ),
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
@@ -556,7 +559,7 @@ class FigurePlotter:
         )
         fig.update_traces(marker=dict(opacity=0))  # Detect but hide outliers
         fig.update_layout(
-            title="Timer {} Operations".format(op),
+            title=dict(text="Timer {} Operations".format(op), y=1),
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
