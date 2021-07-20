@@ -40,9 +40,11 @@ class FigurePlotter:
         margin=dict(l=10, r=10, b=10, t=10, pad=1)
     )
 
-    def __init__(self, indir, outdir):
+    def __init__(self, indir, outdir, dump_data):
         self.indir = indir
         self.outdir = outdir
+        self.dump_data = dump_data
+        
         self.benchmarks = {}
         self.gpio_latencies = {}
 
@@ -135,8 +137,18 @@ class FigurePlotter:
             self.gpio_latencies[board] = np.average(durations)
             LOG.info("GPIO Latency on board {} = {}".format(board, self.gpio_latencies[board]))
 
+    def _dump_dataframe_to_csv(self, df, title):
+        outfile = "{}.csv".format(os.path.join(self.outdir, title))
+        df.to_csv(
+            outfile,
+            sep=",",
+            header=True,
+            index=True
+        )
+        LOG.info("Exported DataFrame to csv: {}".format(outfile))
+
     def _save_figure_as_html(self, fig, title):
-        outfile = "{}/{}.html".format(self.outdir, title)
+        outfile = "{}.html".format(os.path.join(self.outdir, title))
         fig.write_html(
             outfile,
             full_html=True,
@@ -220,7 +232,11 @@ class FigurePlotter:
             xaxis_showgrid=True,
             yaxis_showgrid=True
         )
-        self._save_figure_as_html(fig, "{}_bench_timer_read_write".format(board))
+
+        title = "{}_bench_timer_read_write".format(board)
+        self._save_figure_as_html(fig, title)
+        if self.dump_data:
+            self._dump_dataframe_to_csv(df, title)
 
     def plot_board_set_clear_ops(self, board):
         lgpio = self._get_gpio_latency(board)
@@ -256,7 +272,11 @@ class FigurePlotter:
             xaxis_showgrid=True,
             yaxis_showgrid=True
         )
-        self._save_figure_as_html(fig, "{}_bench_timer_set_clear".format(board))
+
+        title = "{}_bench_timer_set_clear".format(board)
+        self._save_figure_as_html(fig, title)
+        if self.dump_data:
+            self._dump_dataframe_to_csv(df, title)
 
     def plot_board_absolute_timeouts_grouped_by_freq(self, board, freq, ignored_timeouts=[]):
         # Read, combine and process trace samples
@@ -314,7 +334,11 @@ class FigurePlotter:
             xaxis_showgrid=True,
             yaxis_showgrid=True
         )
-        self._save_figure_as_html(fig, "{}_bench_absolute_timeouts_grouped_by_freq_{:.0f}".format(board, freq))
+
+        title = "{}_bench_absolute_timeouts_grouped_by_freq_{:.0f}".format(board, freq)
+        self._save_figure_as_html(fig, title)
+        if self.dump_data:
+            self._dump_dataframe_to_csv(df, title)
 
     def plot_board_absolute_timeouts_grouped_by_timeout(self, board, timeout):
         # Read, combine and process trace samples
@@ -371,7 +395,11 @@ class FigurePlotter:
             xaxis_showgrid=True,
             yaxis_showgrid=True
         )
-        self._save_figure_as_html(fig, "{}_bench_absolute_timeouts_grouped_by_timeout_{}s".format(board, si_format(timeout)))
+
+        title = "{}_bench_absolute_timeouts_grouped_by_timeout_{}s".format(board, si_format(timeout))
+        self._save_figure_as_html(fig, title)
+        if self.dump_data:
+            self._dump_dataframe_to_csv(df, title)
 
     ######################
     ### Overview plots ###
@@ -425,7 +453,10 @@ class FigurePlotter:
             yaxis_rangemode="tozero",
             **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
+
         self._save_figure_as_html(fig, "overview_gpio_latencies")
+        if self.dump_data:
+            self._dump_dataframe_to_csv(df, "overview_gpio_latencies")
 
     def plot_timeout_latencies(self, freq, ticks):
         # Determine timeout length
@@ -495,10 +526,14 @@ class FigurePlotter:
             yaxis_rangemode="tozero",
             **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
-        self._save_figure_as_html(fig, "overview_absolute_timeouts_{}Hz_{}s".format(
+
+        title = "overview_absolute_timeouts_{}Hz_{}s".format(
             si_format(freq, precision=1),
             si_format(timeout, precision=1)
-        ))
+        )
+        self._save_figure_as_html(fig, title)
+        if self.dump_data:
+            self._dump_dataframe_to_csv(df, title)
 
     def plot_simple_operations(self, op, convert_to_cpu_cycles=False):
         # Process samples into DataFrame
@@ -579,7 +614,11 @@ class FigurePlotter:
             yaxis_rangemode="tozero",
             **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
-        self._save_figure_as_html(fig, "overview_"+op.lower()+"_operations" + ("_cpu_cycles" if convert_to_cpu_cycles else ""))
+
+        title = "overview_"+op.lower()+"_operations" + ("_cpu_cycles" if convert_to_cpu_cycles else "")
+        self._save_figure_as_html(fig, title)
+        if self.dump_data:
+            self._dump_dataframe_to_csv(df, title)
 
 
 def main():
@@ -590,6 +629,13 @@ def main():
     parser = argparse.ArgumentParser("Plot generation routines for periph_(u)timer_benchmarks")
     parser.add_argument("indir", help="Input directory containing xunit.xml files to parse")
     parser.add_argument("outdir", help="Output directory to write plots to")
+    parser.add_argument(
+        "--dump-data",
+        dest="dump_data",
+        action="store_true",
+        default=False,
+        help="Dumps generated Pandas DaraFrames to outdir"
+    )
     args = parser.parse_args()
 
     if not os.path.exists(args.indir):
@@ -601,7 +647,8 @@ def main():
     # Generate plots
     plotter = FigurePlotter(
         indir=args.indir,
-        outdir=args.outdir
+        outdir=args.outdir,
+        dump_data=args.dump_data
     )
 
     # Overview plots
