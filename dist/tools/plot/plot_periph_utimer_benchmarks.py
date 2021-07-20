@@ -33,18 +33,27 @@ class FigurePlotter:
     SUITE_TIMER = 'tests_periph_timer_benchmarks'
     SUITE_UTIMER = 'tests_periph_utimer_benchmarks'
 
+    PLOTLY_COMMON_PLOT_PROPS = dict(
+        color_discrete_sequence=px.colors.qualitative.Plotly
+    )
+
     PLOTLY_COMMON_LAYOUT_PROPS = dict(
         autosize=False,
         width=600,
         height=500,
-        margin=dict(l=10, r=10, b=10, t=10, pad=1)
+        margin=dict(l=10, r=10, b=10, t=10, pad=1),
+        template="plotly_white",
+        xaxis_mirror=True,
+        xaxis_showline=True,
+        yaxis_mirror=True,
+        yaxis_showline=True
     )
 
     def __init__(self, indir, outdir, dump_data):
         self.indir = indir
         self.outdir = outdir
         self.dump_data = dump_data
-        
+
         self.benchmarks = {}
         self.gpio_latencies = {}
 
@@ -154,8 +163,18 @@ class FigurePlotter:
             full_html=True,
             include_plotlyjs=True,
         )
-
         LOG.info("Wrote figure: {}".format(outfile))
+
+    def _save_figure_as_image(self, fig, title, filetype="pdf"):
+        outfile = "{}.{}".format(os.path.join(self.outdir, title), filetype)
+        fig.write_image(outfile, scale=1)
+        LOG.info("Wrote figure: {}".format(outfile))
+
+    def _save_figure(self, fig, title):
+        self._save_figure_as_html(fig, title)
+        self._save_figure_as_image(fig, title, filetype="png")
+        self._save_figure_as_image(fig, title, filetype="svg")
+        self._save_figure_as_image(fig, title, filetype="pdf")
 
     def _get_benchmark_data(self, board, testsuite, testcase, datavar):
         return self._extract_bench_values_from_json(
@@ -197,7 +216,7 @@ class FigurePlotter:
             showlegend=False
         )
 
-        self._save_figure_as_html(fig, "{}_gpio_latency".format(board))
+        self._save_figure(fig, "{}_gpio_latency".format(board))
 
     def plot_board_read_write_ops(self, board):
         lgpio = self._get_gpio_latency(board)
@@ -234,7 +253,7 @@ class FigurePlotter:
         )
 
         title = "{}_bench_timer_read_write".format(board)
-        self._save_figure_as_html(fig, title)
+        self._save_figure(fig, title)
         if self.dump_data:
             self._dump_dataframe_to_csv(df, title)
 
@@ -274,7 +293,7 @@ class FigurePlotter:
         )
 
         title = "{}_bench_timer_set_clear".format(board)
-        self._save_figure_as_html(fig, title)
+        self._save_figure(fig, title)
         if self.dump_data:
             self._dump_dataframe_to_csv(df, title)
 
@@ -336,7 +355,7 @@ class FigurePlotter:
         )
 
         title = "{}_bench_absolute_timeouts_grouped_by_freq_{:.0f}".format(board, freq)
-        self._save_figure_as_html(fig, title)
+        self._save_figure(fig, title)
         if self.dump_data:
             self._dump_dataframe_to_csv(df, title)
 
@@ -397,7 +416,7 @@ class FigurePlotter:
         )
 
         title = "{}_bench_absolute_timeouts_grouped_by_timeout_{}s".format(board, si_format(timeout))
-        self._save_figure_as_html(fig, title)
+        self._save_figure(fig, title)
         if self.dump_data:
             self._dump_dataframe_to_csv(df, title)
 
@@ -415,7 +434,7 @@ class FigurePlotter:
                     durations.append({
                         'board': board,
                         'api': data['api'],
-                        'duration': duration
+                        'duration': duration,
                     })
 
                 LOG.info("GPIO Latency on board={} for api={}: {}".format(
@@ -432,17 +451,22 @@ class FigurePlotter:
             x='board',
             y='duration',
             color='api',
-            points="outliers"
+            points="outliers",
+            **self.PLOTLY_COMMON_PLOT_PROPS
         )
-        fig.update_traces(marker=dict(opacity=0))  # Detect but hide outliers
+        fig.update_traces(
+            marker=dict(opacity=0),  # Detect but hide outliers
+            line=dict(width=1)
+        )
         fig.update_layout(
             title="GPIO Latency",
             legend=dict(
+                title="",
                 orientation="h",
                 yanchor="bottom",
                 y=1.01,
                 xanchor="right",
-                x=0.99
+                x=0.99,
             ),
             yaxis_title="Execution time",
             yaxis_ticksuffix="s",
@@ -454,7 +478,7 @@ class FigurePlotter:
             **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
 
-        self._save_figure_as_html(fig, "overview_gpio_latencies")
+        self._save_figure(fig, "overview_gpio_latencies")
         if self.dump_data:
             self._dump_dataframe_to_csv(df, "overview_gpio_latencies")
 
@@ -502,20 +526,25 @@ class FigurePlotter:
             x='board',
             y='latency',
             color='api',
-            points="outliers"
+            points="outliers",
+            **self.PLOTLY_COMMON_PLOT_PROPS
         )
-        fig.update_traces(marker=dict(opacity=0))  # Detect but hide outliers
+        fig.update_traces(
+            marker=dict(opacity=0),  # Detect but hide outliers
+            line=dict(width=1)
+        )
         fig.update_layout(
             title=dict(
                 text="Absolute Timeouts - Timer Frequency: {}Hz, Timeout: {}s".format(si_format(freq), si_format(timeout)),
                 y=1
             ),
             legend=dict(
+                title="",
                 orientation="h",
                 yanchor="bottom",
                 y=1.01,
                 xanchor="right",
-                x=0.99
+                x=0.99,
             ),
             yaxis_title="Timeout Latency",
             yaxis_ticksuffix="s",
@@ -531,7 +560,7 @@ class FigurePlotter:
             si_format(freq, precision=1),
             si_format(timeout, precision=1)
         )
-        self._save_figure_as_html(fig, title)
+        self._save_figure(fig, title)
         if self.dump_data:
             self._dump_dataframe_to_csv(df, title)
 
@@ -593,17 +622,22 @@ class FigurePlotter:
             x='board',
             y='duration',
             color='operation',
-            points="outliers"
+            points="outliers",
+            **self.PLOTLY_COMMON_PLOT_PROPS
         )
-        fig.update_traces(marker=dict(opacity=0))  # Detect but hide outliers
+        fig.update_traces(
+            marker=dict(opacity=0),  # Detect but hide outliers
+            line=dict(width=1)
+        )
         fig.update_layout(
             title=dict(text="Timer {} Operations".format(op), y=1),
             legend=dict(
+                title="",
                 orientation="h",
                 yanchor="bottom",
                 y=1.01,
                 xanchor="right",
-                x=0.99
+                x=0.99,
             ),
             yaxis_title="Execution time" if not convert_to_cpu_cycles else "CPU cycles",
             yaxis_ticksuffix="s" if not convert_to_cpu_cycles else "",
@@ -616,7 +650,7 @@ class FigurePlotter:
         )
 
         title = "overview_"+op.lower()+"_operations" + ("_cpu_cycles" if convert_to_cpu_cycles else "")
-        self._save_figure_as_html(fig, title)
+        self._save_figure(fig, title)
         if self.dump_data:
             self._dump_dataframe_to_csv(df, title)
 
