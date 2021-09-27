@@ -81,27 +81,24 @@ static int _print_cmd_result(const char *cmd, bool success, int ret,
     return success ? RESULT_OK : RESULT_ERROR;
 }
 
-void cb_toggle(void *arg, utim_int_t cause, int channel)
+void cb_toggle(void *arg, int channel)
 {
-    (void)cause;
     (void)channel;
     gpio_t pin = (gpio_t)(intptr_t)arg;
     _debug_toogle(pin);
     mutex_unlock(&cb_mutex);
 }
 
-void cb_high(void *arg, utim_int_t cause, int channel)
+void cb_high(void *arg, int channel)
 {
-    (void)cause;
     (void)channel;
     gpio_t pin = (gpio_t)(intptr_t)arg;
     _debug_set(pin);
     mutex_unlock(&cb_mutex);
 }
 
-void cb_low(void *arg, utim_int_t cause, int channel)
+void cb_low(void *arg, int channel)
 {
-    (void)cause;
     (void)channel;
     gpio_t pin = (gpio_t)(intptr_t)arg;
     _debug_clear(pin);
@@ -112,7 +109,7 @@ void cb_low(void *arg, utim_int_t cause, int channel)
 
 int cmd_timer_init(int argc, char **argv)
 {
-    if (sc_args_check(argc, argv, 5, 5, "DEV FREQ CLK OVF CALLBACK") != ARGS_OK) {
+    if (sc_args_check(argc, argv, 4, 4, "DEV FREQ CLK CALLBACK") != ARGS_OK) {
         return ARGS_ERROR;
     }
 
@@ -131,19 +128,14 @@ int cmd_timer_init(int argc, char **argv)
         return ARGS_ERROR;
     }
 
-    int ovf = false;
-    if (sc_arg2int(argv[4], &ovf) != ARGS_OK) {
-        return ARGS_ERROR;
-    }
-
-    utim_cb_t cb = NULL;
-    if (strncmp(CB_TOGGLE_STR, argv[5], strlen(argv[5])) == 0) {
+    utim_cmp_cb_t cb = NULL;
+    if (strncmp(CB_TOGGLE_STR, argv[4], strlen(argv[4])) == 0) {
         cb = cb_toggle;
     }
-    else if (strncmp(CB_HIGH_STR, argv[5], strlen(argv[5])) == 0) {
+    else if (strncmp(CB_HIGH_STR, argv[4], strlen(argv[4])) == 0) {
         cb = cb_high;
     }
-    else if (strncmp(CB_LOW_STR, argv[5], strlen(argv[5])) == 0) {
+    else if (strncmp(CB_LOW_STR, argv[4], strlen(argv[4])) == 0) {
         cb = cb_low;
     }
     else {
@@ -153,7 +145,7 @@ int cmd_timer_init(int argc, char **argv)
     }
 
     utim_periph_t tim = utimer_get_periph(dev);
-    int res = utimer_init(&tim, freq, clk, ovf, cb, (void*)(intptr_t)debug_pins[dev]);
+    int res = utimer_init(&tim, freq, clk, cb, (void*)(intptr_t)debug_pins[dev], NULL, NULL);
 
     return _print_cmd_result("timer_init", res == 0, res, true);
 }
@@ -349,17 +341,14 @@ int cmd_get_metadata(int argc, char **argv)
 static const shell_command_t shell_commands[] = {
     { "timer_init", "Initialize timer device", cmd_timer_init },
     { "timer_set", "set timer to relative value", cmd_timer_set },
-    { "timer_set_absolute", "set timer to absolute value",
-      cmd_timer_set_absolute },
+    { "timer_set_absolute", "set timer to absolute value", cmd_timer_set_absolute },
     { "timer_clear", "clear timer", cmd_timer_clear },
     { "timer_read", "read timer", cmd_timer_read },
     { "timer_start", "start timer", cmd_timer_start },
     { "timer_stop", "stop timer", cmd_timer_stop },
     { "timer_debug_pin", "config debug pin", cmd_timer_debug_pin },
-    { "timer_read_bench", "execute multiple reads to determine overhead",
-      cmd_timer_bench_read },
-    { "get_metadata", "Get the metadata of the test firmware",
-      cmd_get_metadata },
+    { "timer_read_bench", "execute multiple reads to determine overhead", cmd_timer_bench_read },
+    { "get_metadata", "Get the metadata of the test firmware", cmd_get_metadata },
     { NULL, NULL, NULL }
 };
 

@@ -23,14 +23,13 @@ class PeriphUTimerIf(DutShell):
     DEFAULT_REPEAT_CNT = 1000000
     DEFAULT_CB_NAME = "cb_toggle"
     DEFAULT_TIMER_CLK = "UTIM_CLK_DEFAULT"
-    DEFAULT_OVF_INT = False
     DEFAULT_DBG_PORT = 0
     DEFAULT_DBG_PIN = 0
 
 # periph/timer API calls
-    def timer_init(self, dev=DEFAULT_TIMER_DEV, freq=DEFAULT_FREQ, clk=DEFAULT_TIMER_CLK, ovf=DEFAULT_OVF_INT, cbname=DEFAULT_CB_NAME):
+    def timer_init(self, dev=DEFAULT_TIMER_DEV, freq=DEFAULT_FREQ, clk=DEFAULT_TIMER_CLK, cbname=DEFAULT_CB_NAME):
         """Initialize timer device"""
-        return self.send_cmd('timer_init {} {} {} {} {}'.format(dev, freq, clk, 1 if ovf else 0, cbname))
+        return self.send_cmd('timer_init {} {} {} {} {}'.format(dev, freq, clk, cbname))
 
     def timer_set(self, dev=DEFAULT_TIMER_DEV, chan=DEFAULT_CHAN, ticks=DEFAULT_TICKS):
         """Set timer in ticks relative."""
