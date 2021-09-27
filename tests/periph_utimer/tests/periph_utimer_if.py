@@ -29,7 +29,7 @@ class PeriphUTimerIf(DutShell):
 # periph/timer API calls
     def timer_init(self, dev=DEFAULT_TIMER_DEV, freq=DEFAULT_FREQ, clk=DEFAULT_TIMER_CLK, cbname=DEFAULT_CB_NAME):
         """Initialize timer device"""
-        return self.send_cmd('timer_init {} {} {} {} {}'.format(dev, freq, clk, cbname))
+        return self.send_cmd('timer_init {} {} {} {}'.format(dev, freq, clk, cbname))
 
     def timer_set(self, dev=DEFAULT_TIMER_DEV, chan=DEFAULT_CHAN, ticks=DEFAULT_TICKS):
         """Set timer in ticks relative."""
