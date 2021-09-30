@@ -86,6 +86,11 @@
 #define INSTRUCTIONS_PER_SPIN   5
 #endif
 
+#ifdef CONFIG_BOARD_ESP8266_ESP_12X
+#define F_CPU                   MHZ(80)
+#define INSTRUCTIONS_PER_SPIN   4
+#endif
+
 #ifdef CONFIG_BOARD_SLSTK3402A
 #define F_CPU                   MHZ(40)
 #define INSTRUCTIONS_PER_SPIN   5
