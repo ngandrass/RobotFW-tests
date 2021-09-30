@@ -71,30 +71,7 @@
  */
 #define REPEAT_100(X)   REPEAT_20(X); REPEAT_20(X); REPEAT_20(X); REPEAT_20(X); REPEAT_20(X);
 
-#ifdef CONFIG_BOARD_NUCLEO_L476RG
-#define F_CPU                   MHZ(80)
-#define INSTRUCTIONS_PER_SPIN   5
-#endif
-
-#ifdef CONFIG_BOARD_NUCLEO_F070RB
-#define F_CPU                   MHZ(48)
-#define INSTRUCTIONS_PER_SPIN   7
-#endif
-
-#ifdef CONFIG_BOARD_ESP32_WROOM_32
-#define F_CPU                   MHZ(80)
-#define INSTRUCTIONS_PER_SPIN   5
-#endif
-
-#ifdef CONFIG_BOARD_ESP8266_ESP_12X
-#define F_CPU                   MHZ(80)
-#define INSTRUCTIONS_PER_SPIN   4
-#endif
-
-#ifdef CONFIG_BOARD_SLSTK3402A
-#define F_CPU                   MHZ(40)
-#define INSTRUCTIONS_PER_SPIN   5
-#endif
+#include "board_params.h"
 
 #if (!defined(F_CPU) || !defined(INSTRUCTIONS_PER_SPIN))
 #error Board clock parameters not specified!
