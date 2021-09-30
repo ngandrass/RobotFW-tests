@@ -18,6 +18,11 @@
  * @}
  */
 
+#ifdef CONFIG_BOARD_ARDUINO_MEGA2560
+#define F_CPU                   MHZ(16)
+#define INSTRUCTIONS_PER_SPIN   7
+#endif /* CONFIG_BOARD_ARDUINO_MEGA2560 */
+
 #ifdef CONFIG_BOARD_ESP32_WROOM_32
 #define F_CPU                   MHZ(80)
 #define INSTRUCTIONS_PER_SPIN   5
