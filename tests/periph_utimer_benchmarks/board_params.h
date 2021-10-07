@@ -43,8 +43,18 @@
 #define INSTRUCTIONS_PER_SPIN   7
 #endif /* CONFIG_BOARD_NUCLEO_F070RB */
 
+#ifdef CONFIG_BOARD_SLSTK3400A
+#define F_CPU                   CLOCK_CORECLOCK  // MHZ(25)
+#define INSTRUCTIONS_PER_SPIN   5
+#endif /* CONFIG_BOARD_SLSTK3400A */
+
+#ifdef CONFIG_BOARD_SLSTK3401A
+#define F_CPU                   CLOCK_CORECLOCK  // MHZ(40)
+#define INSTRUCTIONS_PER_SPIN   5
+#endif /* CONFIG_BOARD_SLSTK3401A */
+
 #ifdef CONFIG_BOARD_SLSTK3402A
-#define F_CPU                   MHZ(40)
+#define F_CPU                   CLOCK_CORECLOCK  // MHZ(40)
 #define INSTRUCTIONS_PER_SPIN   5
 #endif /* CONFIG_BOARD_SLSTK3402A */
 
