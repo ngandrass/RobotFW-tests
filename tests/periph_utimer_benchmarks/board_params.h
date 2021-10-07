@@ -19,7 +19,7 @@
  */
 
 #ifdef CONFIG_BOARD_ARDUINO_MEGA2560
-#define F_CPU                   MHZ(16)
+#define F_CPU                   CLOCK_CORECLOCK  // MHZ(16)
 #define INSTRUCTIONS_PER_SPIN   7
 #endif /* CONFIG_BOARD_ARDUINO_MEGA2560 */
 
@@ -50,7 +50,7 @@
 
 #ifdef CONFIG_BOARD_Z1
 #ifndef F_CPU
-#define F_CPU                   CLOCK_CORECLOCK
+#define F_CPU                   CLOCK_CORECLOCK  // MHZ(8)
 #endif
 #define INSTRUCTIONS_PER_SPIN   7
 #endif /* CONFIG_BOARD_Z1 */
