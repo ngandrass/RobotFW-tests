@@ -14,10 +14,28 @@ API Call Expect
     Should Contain      ${RESULT}  result  ${call} does not have a result, return = ${RESULT}  False
     Should Contain      ${RESULT['result']}  ${expect}  ${call} expected ${expect} but received ${RESULT['result']}  False
 
+API Call Expect Any
+    [Documentation]     Fails if the result of the given ``call`` does not
+    ...                 match any of the expected outcomes.
+    [Arguments]         ${expect}  ${call}  @{args}  &{kwargs}
+    ${RESULT}=          Run Keyword  ${call}  @{args}  &{kwargs}
+    Set Suite Variable  ${RESULT}
+    Should Contain      ${RESULT}  result  ${call} does not have a result, return = ${RESULT}  False
+    Should Contain Any  ${RESULT['result']}  @{expect}  msg=${call} expected ${expect} but received ${RESULT['result']}  values=False
+
 API Call Should Succeed
     [Documentation]     Fails if the given API ``call`` does not succeed.
     [Arguments]         ${call}  @{args}  &{kwargs}
     API Call Expect     Success  ${call}  @{args}  &{kwargs}
+
+API Call Should Succeed Or Skip
+    [Documentation]         Fails if the given API ``call`` does not succeed or skip.
+    [Arguments]             ${call}  @{args}  &{kwargs}
+    @{expected_res}=        Create List  Success  Skipped
+    API Call Expect Any     ${expected_res}  ${call}  @{args}  &{kwargs}
+    IF  """${RESULT['result']}""" == """Skipped"""
+        Skip  Skipped by DUT firmware
+    END
 
 API Call Should Timeout
     [Documentation]     Fails if the given API ``call`` does not timeout.

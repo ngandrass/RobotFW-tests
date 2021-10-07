@@ -27,7 +27,7 @@ Benchmark Absolute Timeouts
 
     # Execute
     FOR  ${n}  IN RANGE  ${REPEATS}
-        API Call Should Succeed     Bench Absolute Timeout  ${FREQ}  ${TICKS}
+        API Call Should Succeed Or Skip  Bench Absolute Timeout  ${FREQ}  ${TICKS}
     END
 
     # Evaluate
