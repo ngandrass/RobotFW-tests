@@ -22,11 +22,6 @@ Benchmark Absolute Timeouts
     [Arguments]  ${FREQ}  ${TICKS}  ${REPEATS}
     Run Keyword                 Default Benchmark Setup
 
-    # Check if requested frequency should be tested
-    IF  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1
-        Skip If  ${FREQ} != ${%{TIMER_SPEED}}
-    END
-
     # Check arguments
     Should be True  ${REPEATS} <= 50  # Don't generate more events than PHiLIP trace can hold
 
@@ -73,6 +68,7 @@ Benchmark Absolute Timeouts 10@TIMER_SPEED
 ###################
 
 Benchmark Absolute Timeouts 10@10MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   10      50
 
 ####################
@@ -80,9 +76,11 @@ Benchmark Absolute Timeouts 10@10MHz
 ####################
 
 Benchmark Absolute Timeouts 100@10MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   100     50
 
 Benchmark Absolute Timeouts 10@1MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    10      50
 
 #####################
@@ -90,12 +88,15 @@ Benchmark Absolute Timeouts 10@1MHz
 #####################
 
 Benchmark Absolute Timeouts 1000@10MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   1000    50
 
 Benchmark Absolute Timeouts 100@1MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    100     50
 
 Benchmark Absolute Timeouts 10@100kHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     10      50
 
 ###################
@@ -103,15 +104,19 @@ Benchmark Absolute Timeouts 10@100kHz
 ###################
 
 Benchmark Absolute Timeouts 10000@10MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   10000   50
 
 Benchmark Absolute Timeouts 1000@1MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    1000    50
 
 Benchmark Absolute Timeouts 100@100kHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     100     50
 
 Benchmark Absolute Timeouts 10@10kHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000      10      50
 
 ####################
@@ -119,15 +124,19 @@ Benchmark Absolute Timeouts 10@10kHz
 ####################
 
 Benchmark Absolute Timeouts 100000@10MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   100000  50
 
 Benchmark Absolute Timeouts 10000@1MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    10000   50
 
 Benchmark Absolute Timeouts 1000@100kHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     1000    50
 
 Benchmark Absolute Timeouts 100@10kHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000      100     50
 
 #####################
@@ -135,15 +144,19 @@ Benchmark Absolute Timeouts 100@10kHz
 #####################
 
 Benchmark Absolute Timeouts 1000000@10MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   1000000     50
 
 Benchmark Absolute Timeouts 100000@1MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    100000      50
 
 Benchmark Absolute Timeouts 10000@100kHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     10000       50
 
 Benchmark Absolute Timeouts 1000@10kHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000      1000        50
 
 ##################
@@ -151,13 +164,17 @@ Benchmark Absolute Timeouts 1000@10kHz
 ##################
 
 Benchmark Absolute Timeouts 10000000@10MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000000   10000000    50
 
 Benchmark Absolute Timeouts 1000000@1MHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  1000000    1000000     50
 
 Benchmark Absolute Timeouts 100000@100kHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  100000     100000      50
 
 Benchmark Absolute Timeouts 10000@10kHz
+    Skip If  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1  Additional timer frequency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  10000      10000       50
