@@ -47,3 +47,10 @@
 #define F_CPU                   MHZ(40)
 #define INSTRUCTIONS_PER_SPIN   5
 #endif /* CONFIG_BOARD_SLSTK3402A */
+
+#ifdef CONFIG_BOARD_Z1
+#ifndef F_CPU
+#define F_CPU                   CLOCK_CORECLOCK
+#endif
+#define INSTRUCTIONS_PER_SPIN   7
+#endif /* CONFIG_BOARD_Z1 */
