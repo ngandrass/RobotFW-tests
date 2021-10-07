@@ -22,6 +22,11 @@ Benchmark Absolute Timeouts
     [Arguments]  ${FREQ}  ${TICKS}  ${REPEATS}
     Run Keyword                 Default Benchmark Setup
 
+    # Check if requested frequency should be tested
+    IF  ${%{BENCH_ADDITIONAL_TIMER_FREQUENCIES}} != 1
+        Skip If  ${FREQ} != ${%{TIMER_SPEED}}
+    END
+
     # Check arguments
     Should be True  ${REPEATS} <= 50  # Don't generate more events than PHiLIP trace can hold
 
@@ -41,6 +46,27 @@ Benchmark Absolute Timeouts
     Record Property             bench_absolute_timeouts         ${BENCH_RESULT}
 
 *** Test Cases ***
+
+#########################################
+## Timeouts based on ${%{TIMER_SPEED}} ##
+#########################################
+Benchmark Absolute Timeouts 1000000@TIMER_SPEED
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  ${%{TIMER_SPEED}}  1000000  50
+
+Benchmark Absolute Timeouts 100000@TIMER_SPEED
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  ${%{TIMER_SPEED}}  100000   50
+
+Benchmark Absolute Timeouts 10000@TIMER_SPEED
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  ${%{TIMER_SPEED}}  10000    50
+
+Benchmark Absolute Timeouts 1000@TIMER_SPEED
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  ${%{TIMER_SPEED}}  1000     50
+
+Benchmark Absolute Timeouts 100@TIMER_SPEED
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  ${%{TIMER_SPEED}}  100      50
+
+Benchmark Absolute Timeouts 10@TIMER_SPEED
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  ${%{TIMER_SPEED}}  10       50
 
 ###################
 ## 1 us Timeouts ##

@@ -495,6 +495,11 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
     utimer_stop(&tim);
     utimer_write(&tim, 0);
 
+    if (timeout >> tim.width) {  // Fail on too large counter values
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+
     if (utimer_set(&tim, 0, timeout) != 0) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return -1;
