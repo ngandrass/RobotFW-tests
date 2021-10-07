@@ -30,3 +30,4 @@ Default Test Teardown
 Default Benchmark Setup
     RIOT Reset
     PHILIP Reset
+    API Sync Shell
