@@ -42,12 +42,12 @@ Record Metadata
     Record Property             philip_backoff_spins    ${RESULT['data'][5]}
 
 Verify Board Parameters
-    Run Keyword  Verify Spin Calibration  1     0.1     # ms
-    Run Keyword  Verify Spin Calibration  10    0.1     # ms
-    Run Keyword  Verify Spin Calibration  21    0.1     # ms
-    Run Keyword  Verify Spin Calibration  42    0.1     # ms
-    Run Keyword  Verify Spin Calibration  100   0.1     # ms
-    Run Keyword  Verify Spin Calibration  1000  0.1     # ms
+    Run Keyword  Verify Spin Calibration  1     0.1  # ms
+    Run Keyword  Verify Spin Calibration  10    0.1  # ms
+    Run Keyword  Verify Spin Calibration  21    0.1  # ms
+    Run Keyword  Verify Spin Calibration  42    0.1  # ms
+    Run Keyword  Verify Spin Calibration  100   0.1  # ms
+    Run Keyword  Verify Spin Calibration  1000  1.0  # ms
 
 Measure GPIO Latency
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency
