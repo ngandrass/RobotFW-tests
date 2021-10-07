@@ -25,6 +25,7 @@ Timer Values Should Differ
     API Call Should Succeed     Timer Start
     API Call Should Succeed     Timer Read
     ${t1}=                      API Result Data As Integer
+    Sleep                       10ms
     API Call Should Succeed     Timer Read
     ${t2}=                      API Result Data As Integer
     Should Be True              ${t2} != ${t1}
