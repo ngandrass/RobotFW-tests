@@ -59,6 +59,7 @@
  */
 #define TEST_RESULT_SUCCESS "Success"
 #define TEST_RESULT_ERROR   "Error"
+#define TEST_RESULT_SKIPPED "Skipped"
 /** @} */
 
 /**
