@@ -1,6 +1,6 @@
 include ../Makefile.tests_common
 
-HIL_CMD_TIMEOUT  ?= 5	# seconds
+HIL_CMD_TIMEOUT   = 5	# seconds
 HIL_RESET_WAIT 	 ?= 3	# seconds
 HIL_CONNECT_WAIT ?= 1	# seconds
 
