@@ -3,6 +3,7 @@ include ../Makefile.tests_common
 HIL_CMD_TIMEOUT   = 5	# seconds
 HIL_RESET_WAIT 	 ?= 3	# seconds
 HIL_CONNECT_WAIT ?= 1	# seconds
+BENCH_ADDITIONAL_TIMER_FREQUENCIES ?= 0  # If set to 1, additional timer frequencies besides TIMER_SPEED will be benchmarked
 
 USEMODULE += shell
 USEMODULE += periph_utimer
@@ -27,10 +28,16 @@ else
 	TIMER_SPEED ?= 1000000
 endif
 
-BENCH_ADDITIONAL_TIMER_FREQUENCIES ?= 0  # If set to 1, additional timer frequencies besides TIMER_SPEED will be benchmarked
-
 export TIMER_SPEED
 export BENCH_ADDITIONAL_TIMER_FREQUENCIES
+
+ifeq "$(BOARD)" "z1"
+	SPIN_TIMEOUT_ACCEPTANCE_FACTOR = 2.0
+else
+	SPIN_TIMEOUT_ACCEPTANCE_FACTOR = 1.0
+endif
+
+export SPIN_TIMEOUT_ACCEPTANCE_FACTOR
 
 USE_JSON_SHELL_PARSER ?= 1
 
