@@ -17,6 +17,7 @@ Default Suite Setup
 # reset application before running any test
 Default Test Setup
     RIOT Reset
+    API Sync Shell
     PHILIP Reset
     API Sync Shell
 
@@ -29,5 +30,6 @@ Default Test Teardown
 # Setup a benchmark
 Default Benchmark Setup
     RIOT Reset
+    API Sync Shell
     PHILIP Reset
     API Sync Shell
