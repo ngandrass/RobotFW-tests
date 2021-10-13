@@ -53,8 +53,14 @@ Verify Board Parameters
     Run Keyword  Verify Spin Calibration  100   ${{ 0.1 * ${fac} }}  # ms
     Run Keyword  Verify Spin Calibration  1000  ${{ 1.0 * ${fac} }}  # ms
 
-Measure GPIO Latency
+Measure GPIO Latency 1us
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  1     #us
+
+Measure GPIO Latency 10us
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  10    #us
+
+Measure GPIO Latency 100us
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  100   #us
+
+Measure GPIO Latency 1000us
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  1000  #us
