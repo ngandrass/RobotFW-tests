@@ -93,7 +93,7 @@
 /**
  * @brief   Busy wait (spin) for the given number of loop iterations
  */
-static inline void spin(uint32_t n) {
+static inline void spin(unsigned int n) {
     while (n--) {
         __asm__ volatile ("");
     }
@@ -135,18 +135,18 @@ static inline void _bench_teardown(void) {
  */
 int cmd_bench_gpio_latency(int argc, char **argv) {
     // Parse arguments
-    if (sc_args_check(argc, argv, 1, 1, "TIMEOUT_MS") != ARGS_OK) {
+    if (sc_args_check(argc, argv, 1, 1, "TIMEOUT_US") != ARGS_OK) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return ARGS_ERROR;
     }
 
-    unsigned int timeout_ms = 0;
-    if (sc_arg2uint(argv[1], &timeout_ms) != ARGS_OK) {
+    unsigned int timeout_us = 0;
+    if (sc_arg2uint(argv[1], &timeout_us) != ARGS_OK) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
         return ARGS_ERROR;
     }
 
-    uint32_t cycles_to_spin = timeout_ms * CYCLES_PER_MSEC;
+    unsigned int cycles_to_spin = timeout_us * CYCLES_PER_USEC;
 
     _bench_setup(DISABLE_IRQs);
 

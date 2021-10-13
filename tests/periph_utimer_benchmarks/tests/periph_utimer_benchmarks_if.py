@@ -18,18 +18,18 @@ class PeriphUTimerBenchmarksIf(DutShell):
     FW_ID = 'periph_utimer_benchmarks'
 
     # Benchmark calls
-    def bench_gpio_latency(self, timeout_ms=1):
+    def bench_gpio_latency(self, timeout_us=1):
         """Execute GPIO latency benchmark."""
-        return self.send_cmd('bench_gpio_latency {}'.format(timeout_ms))
+        return self.send_cmd('bench_gpio_latency {}'.format(timeout_us))
 
-    def process_bench_gpio_latency(self, trace, timeout_ms=1):
+    def process_bench_gpio_latency(self, trace, timeout_us=1):
         """Postprocess trace data from GPIO latency benchmark."""
-        timeout_s = timeout_ms * 1e-3
+        timeout_s = timeout_us * 1e-6
         # Extract diffs between edges and remove intermediate wait period from results
         edge_diffs_with_delay = [x['diff'] for x in trace if
             x['source'] == "DUT_IC" and
             x['event'] == "FALLING" and
-            1e-9 < x['diff'] < (1e-2 + timeout_s)
+            1e-9 < x['diff'] < (1e-5 + timeout_s)
         ]
 
         edge_delay = timeout_s

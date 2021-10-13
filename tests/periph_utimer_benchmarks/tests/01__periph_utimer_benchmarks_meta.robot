@@ -14,14 +14,15 @@ Test Teardown       Run Keywords    Default Test Teardown
 
 *** Keywords ***
 Measure GPIO Latency
-    [Arguments]  ${TIMEOUT_MS}
+    [Arguments]  ${TIMEOUT_US}
     Run Keyword                 Default Benchmark Setup
 
-    API Call Should Succeed     Bench GPIO Latency          ${TIMEOUT_MS}
+    API Call Should Succeed     Bench GPIO Latency          ${TIMEOUT_US}
     API Call Should Succeed     PHILIP.Read Trace
     Record Property             trace                       ${RESULT['data']}
-    ${BENCH_GPIO_LATENCY} =     Process Bench GPIO Latency  ${RESULT['data']}  ${TIMEOUT_MS}
+    ${BENCH_GPIO_LATENCY} =     Process Bench GPIO Latency  ${RESULT['data']}  ${TIMEOUT_US}
     Record Property             bench_gpio_latency          ${BENCH_GPIO_LATENCY}
+    Record Property             timeout_us                  ${TIMEOUT_US}
 
 Verify Spin Calibration
     [Arguments]  ${TIMEOUT_MS}  ${MAX_DIFF_MS}
@@ -52,7 +53,7 @@ Verify Board Parameters
     Run Keyword  Verify Spin Calibration  1000  ${{ 1.0 * ${fac} }}  # ms
 
 Measure GPIO Latency
-    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  1    #ms
-    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  2    #ms
-    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  5    #ms
-    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  10   #ms
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  1     #us
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  10    #us
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  100   #us
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  1000  #us
