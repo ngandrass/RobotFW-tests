@@ -71,25 +71,7 @@
  */
 #define REPEAT_100(X)   REPEAT_20(X); REPEAT_20(X); REPEAT_20(X); REPEAT_20(X); REPEAT_20(X);
 
-#ifdef CONFIG_BOARD_NUCLEO_L476RG
-#define F_CPU                   MHZ(80)
-#define INSTRUCTIONS_PER_SPIN   5
-#endif
-
-#ifdef CONFIG_BOARD_NUCLEO_F070RB
-#define F_CPU                   MHZ(48)
-#define INSTRUCTIONS_PER_SPIN   7
-#endif
-
-#ifdef CONFIG_BOARD_ESP32_WROOM_32
-#define F_CPU                   MHZ(80)
-#define INSTRUCTIONS_PER_SPIN   5
-#endif
-
-#ifdef CONFIG_BOARD_SLSTK3402A
-#define F_CPU                   MHZ(40)
-#define INSTRUCTIONS_PER_SPIN   5
-#endif
+#include "board_params.h"
 
 #if (!defined(F_CPU) || !defined(INSTRUCTIONS_PER_SPIN))
 #error Board clock parameters not specified!
@@ -111,7 +93,7 @@
 /**
  * @brief   Busy wait (spin) for the given number of loop iterations
  */
-static inline void spin(uint32_t n) {
+static inline void spin(unsigned int n) {
     while (n--) {
         __asm__ volatile ("");
     }
@@ -152,14 +134,25 @@ static inline void _bench_teardown(void) {
  * calls represents a time-measured operation.
  */
 int cmd_bench_gpio_latency(int argc, char **argv) {
-    (void) argc;
-    (void) argv;
+    // Parse arguments
+    if (sc_args_check(argc, argv, 1, 1, "TIMEOUT_US") != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned int timeout_us = 0;
+    if (sc_arg2uint(argv[1], &timeout_us) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned int cycles_to_spin = timeout_us * CYCLES_PER_USEC;
 
     _bench_setup(DISABLE_IRQs);
 
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        spin(1 * CYCLES_PER_MSEC);
+        spin(cycles_to_spin);
         gpio_clear(GPIO_IC);
         spin(PHILIP_BACKOFF_SPINS);
     }
@@ -325,6 +318,7 @@ int cmd_get_metadata(int argc, char **argv) {
 
     print_data_str(PARSER_DEV_NUM, RIOT_BOARD);
     print_data_str(PARSER_DEV_NUM, RIOT_VERSION);
+    print_data_str(PARSER_DEV_NUM, __TIMESTAMP__);
     print_data_str(PARSER_DEV_NUM, RIOT_APPLICATION);
     print_data_int(PARSER_DEV_NUM, F_CPU);
     print_data_int(PARSER_DEV_NUM, INSTRUCTIONS_PER_SPIN);

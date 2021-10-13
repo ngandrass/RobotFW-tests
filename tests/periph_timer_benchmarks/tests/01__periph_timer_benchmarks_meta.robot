@@ -14,13 +14,15 @@ Test Teardown       Run Keywords    Default Test Teardown
 
 *** Keywords ***
 Measure GPIO Latency
+    [Arguments]  ${TIMEOUT_US}
     Run Keyword                 Default Benchmark Setup
 
-    API Call Should Succeed     Bench GPIO Latency
+    API Call Should Succeed     Bench GPIO Latency          ${TIMEOUT_US}
     API Call Should Succeed     PHILIP.Read Trace
     Record Property             trace                       ${RESULT['data']}
-    ${BENCH_GPIO_LATENCY} =     Process Bench GPIO Latency  ${RESULT['data']}
+    ${BENCH_GPIO_LATENCY} =     Process Bench GPIO Latency  ${RESULT['data']}  ${TIMEOUT_US}
     Record Property             bench_gpio_latency          ${BENCH_GPIO_LATENCY}
+    Record Property             timeout_us                  ${TIMEOUT_US}
 
 Verify Spin Calibration
     [Arguments]  ${TIMEOUT_MS}  ${MAX_DIFF_MS}
@@ -36,17 +38,29 @@ Record Metadata
     API Call Should Succeed     Get Metadata
     Record Property             board                   ${RESULT['data'][0]}
     Record Property             riot_version            ${RESULT['data'][1]}
-    Record Property             testsuite               ${RESULT['data'][2]}
-    Record Property             freq_cpu                ${RESULT['data'][3]}
-    Record Property             instructions_per_spin   ${RESULT['data'][4]}
-    Record Property             philip_backoff_spins    ${RESULT['data'][5]}
+    Record Property             build_timestamp         ${RESULT['data'][2]}
+    Record Property             testsuite               ${RESULT['data'][3]}
+    Record Property             freq_cpu                ${RESULT['data'][4]}
+    Record Property             instructions_per_spin   ${RESULT['data'][5]}
+    Record Property             philip_backoff_spins    ${RESULT['data'][6]}
 
 Verify Board Parameters
-    Run Keyword  Verify Spin Calibration  1     0.01    # ms
-    Run Keyword  Verify Spin Calibration  10    0.01    # ms
-    Run Keyword  Verify Spin Calibration  21    0.01    # ms
-    Run Keyword  Verify Spin Calibration  42    0.1     # ms
-    Run Keyword  Verify Spin Calibration  100   0.1     # ms
+    ${fac}=      Convert To Number  ${%{SPIN_TIMEOUT_ACCEPTANCE_FACTOR}}
+    Run Keyword  Verify Spin Calibration  1     ${{ 0.1 * ${fac} }}  # ms
+    Run Keyword  Verify Spin Calibration  10    ${{ 0.1 * ${fac} }}  # ms
+    Run Keyword  Verify Spin Calibration  21    ${{ 0.1 * ${fac} }}  # ms
+    Run Keyword  Verify Spin Calibration  42    ${{ 0.1 * ${fac} }}  # ms
+    Run Keyword  Verify Spin Calibration  100   ${{ 0.1 * ${fac} }}  # ms
+    Run Keyword  Verify Spin Calibration  1000  ${{ 1.0 * ${fac} }}  # ms
 
-Measure GPIO Latency
-    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency
+Measure GPIO Latency 1us
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  1     #us
+
+Measure GPIO Latency 10us
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  10    #us
+
+Measure GPIO Latency 100us
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  100   #us
+
+Measure GPIO Latency 1000us
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  1000  #us
