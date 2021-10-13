@@ -137,7 +137,7 @@ class PeriphTimerBenchmarksIf(DutShell):
         durations_ms = [x['diff']*1e3 for x in trace if
             x['source'] == "DUT_IC" and
             x['event'] == "FALLING" and
-            x['diff'] < 1
+            x['diff'] < 2  # seconds
         ]
 
         if len(durations_ms) == 0:
