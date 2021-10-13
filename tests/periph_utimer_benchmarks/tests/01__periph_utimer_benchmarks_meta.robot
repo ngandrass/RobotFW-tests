@@ -38,10 +38,11 @@ Record Metadata
     API Call Should Succeed     Get Metadata
     Record Property             board                   ${RESULT['data'][0]}
     Record Property             riot_version            ${RESULT['data'][1]}
-    Record Property             testsuite               ${RESULT['data'][2]}
-    Record Property             freq_cpu                ${RESULT['data'][3]}
-    Record Property             instructions_per_spin   ${RESULT['data'][4]}
-    Record Property             philip_backoff_spins    ${RESULT['data'][5]}
+    Record Property             build_timestamp         ${RESULT['data'][2]}
+    Record Property             testsuite               ${RESULT['data'][3]}
+    Record Property             freq_cpu                ${RESULT['data'][4]}
+    Record Property             instructions_per_spin   ${RESULT['data'][5]}
+    Record Property             philip_backoff_spins    ${RESULT['data'][6]}
 
 Verify Board Parameters
     ${fac}=      Convert To Number  ${%{SPIN_TIMEOUT_ACCEPTANCE_FACTOR}}
