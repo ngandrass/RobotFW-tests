@@ -130,18 +130,29 @@ static inline void _bench_teardown(void) {
  * @brief   Benchmarks latency of the GPIO_IC pin
  *
  * The GPIO_IC pin is toggled repeatedly to measure the amount of time consumed
- * by the gpio_set() and gpio_clear() calls. A 1ms spin between the two GPIO
- * calls represents a time-measured operation.
+ * by the gpio_set() and gpio_clear() calls. A spin between the two GPIO calls
+ * represents a time-measured operation.
  */
 int cmd_bench_gpio_latency(int argc, char **argv) {
-    (void) argc;
-    (void) argv;
+    // Parse arguments
+    if (sc_args_check(argc, argv, 1, 1, "TIMEOUT_MS") != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned int timeout_ms = 0;
+    if (sc_arg2uint(argv[1], &timeout_ms) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    uint32_t cycles_to_spin = timeout_ms * CYCLES_PER_MSEC;
 
     _bench_setup(DISABLE_IRQs);
 
     for (int i = 0; i < DEFAULT_BENCH_REPEAT_COUNT; i++) {
         gpio_set(GPIO_IC);
-        spin(1 * CYCLES_PER_MSEC);
+        spin(cycles_to_spin);
         gpio_clear(GPIO_IC);
         spin(PHILIP_BACKOFF_SPINS);
     }
