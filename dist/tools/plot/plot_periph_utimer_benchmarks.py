@@ -20,18 +20,15 @@ LOG = logging.getLogger(__name__)
 
 class FigurePlotter:
 
-    BOARD_F_CPU = {
-        'nucleo-f070rb': 48e6,
-        'nucleo-l476rg': 80e6,
-        'esp32-wroom-32': 80e6,
-        'slstk3402a': 40e6
-    }
-
     XUNIT_FILE_PATTERN = '*xunit.xml'
     XUNIT_TESTSUITE_NAME_PATTERN = r"^tests_periph_(u)?timer_benchmarks$"
 
     SUITE_TIMER = 'tests_periph_timer_benchmarks'
     SUITE_UTIMER = 'tests_periph_utimer_benchmarks'
+    EXPECTED_SUITES = [
+        SUITE_TIMER,
+        SUITE_UTIMER
+    ]
 
     PLOTLY_COMMON_PLOT_PROPS = dict(
         color_discrete_sequence=px.colors.qualitative.Plotly
@@ -55,9 +52,12 @@ class FigurePlotter:
         self.dump_data = dump_data
 
         self.benchmarks = {}
+        self.board_fcpu = {}
         self.gpio_latencies = {}
 
         self._parse_all_benchmarks_from_dir(self.indir)
+        self._validate_benchmark_data()
+        self._calc_board_fcpu()
         self._calc_gpio_latencies()
 
     def _parse_all_benchmarks_from_dir(self, directory):
@@ -75,6 +75,7 @@ class FigurePlotter:
             self.benchmarks.setdefault(board, {})[suite] = {
                 'api': api,
                 'riot_version': xunit_data['Record Metadata']['riot_version'][0],
+                'build_timestamp': xunit_data['Record Metadata']['build_timestamp'][0],
                 'freq_cpu': xunit_data['Record Metadata']['freq_cpu'][0],
                 'instructions_per_spin': xunit_data['Record Metadata']['instructions_per_spin'][0],
                 'philip_backoff_spins': xunit_data['Record Metadata']['philip_backoff_spins'][0],
@@ -103,6 +104,9 @@ class FigurePlotter:
         # Extract benchmarks (testcase properties) from testsuite
         benchmarks = {}
         for benchmark in testsuite['testcase']:
+            if 'skipped' in benchmark:
+                continue
+
             props = {}
             for property in benchmark['properties']['property']:
                 try:
@@ -124,6 +128,14 @@ class FigurePlotter:
 
         return values
 
+    def _validate_benchmark_data(self):
+        for board, benchmarks in self.benchmarks.items():
+            for suite in self.EXPECTED_SUITES:
+                if suite not in benchmarks:
+                    raise ValueError(f"{suite} is missing for board {board}.")
+
+        return True
+
     def _calc_statistical_properties(self, dataset):
         return {
             'avg': np.average(dataset),
@@ -135,12 +147,17 @@ class FigurePlotter:
             'samples': len(dataset)
         }
 
+    def _calc_board_fcpu(self):
+        for board, suites in self.benchmarks.items():
+            for suite in suites.values():
+                self.board_fcpu[board] = int(suite['freq_cpu'])
+
     def _calc_gpio_latencies(self):
         for board, suites in self.benchmarks.items():
             durations = []
             for suite in suites.values():
                 durations = durations + self._extract_bench_values_from_json(
-                    suite['benchmarks']['Measure GPIO Latency']['bench_gpio_latency']
+                    suite['benchmarks']['Measure GPIO Latency 1us']['bench_gpio_latency']
                 )
 
             self.gpio_latencies[board] = np.average(durations)
@@ -193,27 +210,64 @@ class FigurePlotter:
 
     def plot_board_gpio_latency(self, board):
         # Process samples
-        durations = {
-            'periph_utimer': self._get_benchmark_data(board, self.SUITE_UTIMER, 'Measure GPIO Latency', 'bench_gpio_latency'),
-            'periph_timer': self._get_benchmark_data(board, self.SUITE_TIMER, 'Measure GPIO Latency', 'bench_gpio_latency'),
-        }
+        durations = []
+        for testsuite, testsuite_data in self.benchmarks[board].items():
+            for case, data in testsuite_data['benchmarks'].items():
+                if case.startswith('Measure GPIO Latency'):
+                    if not data:
+                        continue
 
-        LOG.info("periph_utimer GPIO Latency: {}".format(self._calc_statistical_properties(durations['periph_utimer'])))
-        LOG.info("periph_timer GPIO Latency: {}".format(self._calc_statistical_properties(durations['periph_timer'])))
+                    timeout_us = int(data['timeout_us'][0])
+                    for duration in self._extract_bench_values_from_json(data['bench_gpio_latency']):
+                        durations.append({
+                            'api': testsuite_data['api'],
+                            'timeout': timeout_us / 1e6,
+                            'timeout_us': timeout_us,
+                            'duration': duration
+                        })
+        df = pd.DataFrame(durations)
+
+        # Calculate statistical properties
+        for api in df['api'].unique():
+            for timeout_us in df[df['api'] == api]['timeout_us'].unique():
+                LOG.info("GPIO Latency {}us on board={} for api={}: {}".format(
+                    timeout_us,
+                    board,
+                    api,
+                    self._calc_statistical_properties(df[(df['api'] == api) & (df['timeout_us'] == timeout_us)]['duration'])
+                ))
 
         # Generate box plot
-        data = pd.DataFrame.from_dict(durations, orient='index').transpose()
-        fig = go.Figure()
-        fig.add_trace(go.Box(name='periph_utimer', y=durations['periph_utimer']))
-        fig.add_trace(go.Box(name='periph_timer', y=durations['periph_timer']))
+        fig = px.box(
+            data_frame=df,
+            x=[si_format(x, precision=0) for x in df['timeout']],
+            y='duration',
+            color='api',
+            points="outliers",
+            **self.PLOTLY_COMMON_PLOT_PROPS
+        )
+        fig.update_traces(
+            marker=dict(opacity=0),  # Detect but hide outliers
+            line=dict(width=1)
+        )
         fig.update_layout(
             title="GPIO Latency - Board: {}".format(board),
+            legend=dict(
+                title="",
+                orientation="h",
+                yanchor="bottom",
+                y=1.01,
+                xanchor="right",
+                x=0.99,
+            ),
             yaxis_title="Execution time",
             yaxis_ticksuffix="s",
-            xaxis_title="Timer Driver",
+            xaxis_title="Spin timeout",
+            xaxis_ticksuffix="s",
             xaxis_showgrid=True,
             yaxis_showgrid=True,
-            showlegend=False
+            yaxis_rangemode="tozero",
+            **self.PLOTLY_COMMON_LAYOUT_PROPS
         )
 
         self._save_figure(fig, "{}_gpio_latency".format(board))
@@ -429,7 +483,7 @@ class FigurePlotter:
         durations = []
         for board, suites in self.benchmarks.items():
             for suite, data in suites.items():
-                gpio_latencies = self._get_benchmark_data(board, suite, 'Measure GPIO Latency', 'bench_gpio_latency')
+                gpio_latencies = self._get_benchmark_data(board, suite, 'Measure GPIO Latency 1us', 'bench_gpio_latency')
                 for duration in gpio_latencies:
                     durations.append({
                         'board': board,
@@ -437,7 +491,7 @@ class FigurePlotter:
                         'duration': duration,
                     })
 
-                LOG.info("GPIO Latency on board={} for api={}: {}".format(
+                LOG.info("GPIO Latency 1us on board={} for api={}: {}".format(
                     board,
                     data['api'],
                     self._calc_statistical_properties(gpio_latencies))
@@ -593,7 +647,7 @@ class FigurePlotter:
                         for duration in durations:
                             read_duration = (duration - self._get_gpio_latency(board)) / 10
                             if convert_to_cpu_cycles:
-                                read_duration = round(read_duration*self.BOARD_F_CPU[board], ndigits=1)
+                                read_duration = round(read_duration*self.board_fcpu[board], ndigits=1)
 
                             op_durations.append({
                                 'board': board,
