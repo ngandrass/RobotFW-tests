@@ -189,8 +189,8 @@ class FigurePlotter:
 
     def _save_figure(self, fig, title):
         self._save_figure_as_html(fig, title)
-        self._save_figure_as_image(fig, title, filetype="png")
-        self._save_figure_as_image(fig, title, filetype="svg")
+        #self._save_figure_as_image(fig, title, filetype="png")
+        #self._save_figure_as_image(fig, title, filetype="svg")
         self._save_figure_as_image(fig, title, filetype="pdf")
 
     def _get_benchmark_data(self, board, testsuite, testcase, datavar):
