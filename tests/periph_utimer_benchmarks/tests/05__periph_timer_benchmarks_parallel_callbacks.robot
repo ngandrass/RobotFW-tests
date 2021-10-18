@@ -37,7 +37,6 @@ Benchmark Parallel Callbacks
     Record Property             bench_parallel_callbacks          ${BENCH_RESULT}
 
 *** Test Cases ***
-
 Benchmark 1 Parallel Callbacks 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  ${%{TIMER_SPEED}}  1000  1  50
 

@@ -16,7 +16,7 @@ Test Teardown       Run Keywords    Default Test Teardown
 Benchmark Timer Read
     Run Keyword                 Default Benchmark Setup
 
-    API Call Should Succeed     Bench Timer Read
+    API Call Should Succeed     Bench Timer Read            ${None}
     API Call Should Succeed     PHILIP.Read Trace
     Record Property             trace                       ${RESULT['data']}
 
@@ -26,7 +26,7 @@ Benchmark Timer Read
 Benchmark Timer Set
     Run Keyword                 Default Benchmark Setup
 
-    API Call Should Succeed     Bench Timer Set
+    API Call Should Succeed     Bench Timer Set             ${None}
     API Call Should Succeed     PHILIP.Read Trace
     Record Property             trace                       ${RESULT['data']}
 
@@ -36,7 +36,7 @@ Benchmark Timer Set
 Benchmark Timer Clear
     Run Keyword                 Default Benchmark Setup
 
-    API Call Should Succeed     Bench Timer Clear
+    API Call Should Succeed     Bench Timer Clear           ${None}
     API Call Should Succeed     PHILIP.Read Trace
     Record Property             trace                       ${RESULT['data']}
 
