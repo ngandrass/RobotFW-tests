@@ -173,6 +173,26 @@ class PeriphUTimerBenchmarksIf(DutShell):
 
         return self._calc_statistical_properties(timeout_durations)
 
+    def bench_parallel_callbacks(self, freq, ticks, channels):
+        """Executes the parallel callbacks benchmark.
+
+        :param freq:        Frequency to initialize the timer to
+        :param ticks:       Number of absolute timer ticks to timeout
+        :param channels:    Number of channels to arm simultaneously
+        """
+        return self.send_cmd("bench_parallel_callbacks {} {} {}".format(freq, ticks, channels))
+
+    def process_bench_parallel_callbacks(self, trace):
+        """Postprocess trace data from parallel callbacks benchmark."""
+
+        # Extract recorded timeout durations (time between rising and falling edge)
+        timeout_durations = [x['diff'] for x in trace if
+            x['source'] == "DUT_IC" and
+            x['event'] == "FALLING"
+        ]
+
+        return self._calc_statistical_properties(timeout_durations)
+
     # Util calls
     def get_metadata(self):
         """Get the metadata of the firmware."""
