@@ -43,6 +43,23 @@
 #define BENCH_TIMER_DEV (0)
 #endif
 
+#include "board_params.h"
+
+#if (!defined(F_CPU) || !defined(INSTRUCTIONS_PER_SPIN))
+#error Board clock parameters not specified!
+#endif
+
+#define CYCLES_PER_SEC          (F_CPU / INSTRUCTIONS_PER_SPIN)
+#define CYCLES_PER_MSEC         (CYCLES_PER_SEC / 1000)
+#define CYCLES_PER_USEC         (CYCLES_PER_MSEC / 1000)
+
+#define PHILIP_BACKOFF_SPINS    (1 * CYCLES_PER_USEC)  /**< Worst case number of spins PHiLIP needs between two consecutive trace edges */
+
+#define GPIO_IC GPIO_PIN(HIL_DUT_IC_PORT, HIL_DUT_IC_PIN)
+
+#define DISABLE_IRQs    false
+#define ENABLE_IRQs     true
+
 /**
  * @brief   Default amount of times a single benchmark is repeated
  *
@@ -70,23 +87,6 @@
  * @brief   Repeats a single operation 100 times
  */
 #define REPEAT_100(X)   REPEAT_20(X); REPEAT_20(X); REPEAT_20(X); REPEAT_20(X); REPEAT_20(X);
-
-#include "board_params.h"
-
-#if (!defined(F_CPU) || !defined(INSTRUCTIONS_PER_SPIN))
-#error Board clock parameters not specified!
-#endif
-
-#define CYCLES_PER_SEC          (F_CPU / INSTRUCTIONS_PER_SPIN)
-#define CYCLES_PER_MSEC         (CYCLES_PER_SEC / 1000)
-#define CYCLES_PER_USEC         (CYCLES_PER_MSEC / 1000)
-
-#define PHILIP_BACKOFF_SPINS    (1 * CYCLES_PER_USEC)  /**< Worst case number of spins PHiLIP needs between two consecutive trace edges */
-
-#define GPIO_IC GPIO_PIN(HIL_DUT_IC_PORT, HIL_DUT_IC_PIN)
-
-#define DISABLE_IRQs    false
-#define ENABLE_IRQs     true
 
 /* Helper functions */
 

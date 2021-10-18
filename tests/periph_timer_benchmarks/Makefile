@@ -1,4 +1,5 @@
 include ../Makefile.tests_common
+include ../common/periph_timer_benchmarks/Makefile
 
 HIL_CMD_TIMEOUT   = 3   # seconds
 HIL_RESET_WAIT    = 0.1 # seconds
