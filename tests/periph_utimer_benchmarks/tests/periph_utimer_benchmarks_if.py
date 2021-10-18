@@ -10,6 +10,7 @@ import logging
 import numpy as np
 
 from riot_pal import DutShell
+from robot.libraries.BuiltIn import BuiltIn
 
 
 class PeriphUTimerBenchmarksIf(DutShell):
@@ -184,12 +185,13 @@ class PeriphUTimerBenchmarksIf(DutShell):
         """
         return self.send_cmd('spin_timeout_ms {}'.format(timeout_ms))
 
-    def verify_spin_timeout_ms(self, trace, timeout_ms, max_diff_ms=0.01):
+    def verify_spin_timeout_ms(self, trace, timeout_ms, max_diff_ms=0.01, abort_on_error=True):
         """Verify that a spin timeout is within accepted time range.
 
-        :param trace:       PHiLIP trace data from spin_timeout_ms()
-        :param timeout_ms:  Number of milliseconds the DUT spun for
-        :param max_diff_ms: Maximum allowed deviation in milliseconds
+        :param trace:           PHiLIP trace data from spin_timeout_ms()
+        :param timeout_ms:      Number of milliseconds the DUT spun for
+        :param max_diff_ms:     Maximum allowed deviation in milliseconds
+        :param abort_on_error:  If True, test suite execution is aborted upon error
 
         :return:    True if spin timeout was within acceptable range
         """
@@ -200,12 +202,24 @@ class PeriphUTimerBenchmarksIf(DutShell):
         ]
 
         if len(durations_ms) == 0:
+            if abort_on_error:
+                BuiltIn().fatal_error("No matching timeout edge found in trace")
+
             raise IndexError("No matching timeout edge found in trace")
 
         if len(durations_ms) > 1:
+            if abort_on_error:
+                BuiltIn().fatal_error("Too many timeout edges found in trace")
+
             raise IndexError("Too many timeout edges found in trace")
 
         if abs(float(durations_ms[0]) - float(timeout_ms)) > float(max_diff_ms):
+            if abort_on_error:
+                BuiltIn().fatal_error("Recorded spin timeout period out of bounds. Expected: {} ms, Actual: {} ms".format(
+                    timeout_ms,
+                    durations_ms[0]
+                ))
+
             raise ValueError("Recorded spin timeout period out of bounds. Expected: {} ms, Actual: {} ms".format(
                 timeout_ms,
                 durations_ms[0]

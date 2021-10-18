@@ -20,7 +20,7 @@ Verify Spin Calibration
     API Call Should Succeed     Spin Timeout Ms  ${TIMEOUT_MS}
     API Call Should Succeed     PHILIP.Read Trace
     Record Property             trace  ${RESULT['data']}
-    ${SUCCESS} =                Verify Spin Timeout Ms  ${RESULT['data']}  ${TIMEOUT_MS}  ${MAX_DIFF_MS}
+    ${SUCCESS} =                Verify Spin Timeout Ms  ${RESULT['data']}  ${TIMEOUT_MS}  ${MAX_DIFF_MS}  # False  # If false, test suite execution is not aborted upon error
 
 *** Test Cases ***
 Record Metadata
