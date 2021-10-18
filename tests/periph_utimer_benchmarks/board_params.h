@@ -78,6 +78,11 @@
 #define INSTRUCTIONS_PER_SPIN   5
 #endif /* CONFIG_BOARD_SLSTK3402A */
 
+#ifdef CONFIG_BOARD_STK3200
+#define F_CPU                   CLOCK_CORECLOCK  // MHZ(24)
+#define INSTRUCTIONS_PER_SPIN   5
+#endif /* CONFIG_BOARD_STK3200 */
+
 #ifdef CONFIG_BOARD_Z1
 #ifndef F_CPU
 #define F_CPU                   CLOCK_CORECLOCK  // MHZ(8)
