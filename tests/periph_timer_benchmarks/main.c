@@ -310,6 +310,88 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
     return 0;
 }
 
+void _bench_parallel_callbacks_cb(void *arg, int channel) {
+    (void) channel;
+
+    (*(volatile unsigned int *) arg)--;
+
+    return;
+}
+
+/**
+ * @brief   Benchmarks the latency of the latest timeout when multiple timeouts
+ *          elapse simultaneously.
+ *
+ * The timer is initialized and set to zero before arming the amount of
+ * requested channels to the desired timout. Once prepared the timer is
+ * started. GPIO_IC is held high until all channels triggered the associated
+ * user callback once.
+ *
+ * @param argv[1]   Frequency used for the timer
+ * @param argv[2]   Timeout in ticks (absolute counter value)
+ * @param argv[3]   Number of channels to arm
+ */
+int cmd_bench_parallel_callbacks(int argc, char** argv) {
+    // Parse arguments
+    if (sc_args_check(argc, argv, 3, 3, "FREQUENCY TIMEOUT CHANNELS") != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned long freq = 0;
+    if (sc_arg2ulong(argv[1], &freq) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned long timeout = 0;
+    if (sc_arg2ulong(argv[2], &timeout) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned int channel_count = 0;
+    if (sc_arg2uint(argv[3], &channel_count) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    _bench_setup(ENABLE_IRQs);
+
+    // Initialize timer and callback
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"  // Ignore warning about discarded volatile qualifier. It is restored within the ISR
+    volatile uint16_t channels_left = channel_count;
+    if (timer_init(BENCH_TIMER_DEV, freq, &_bench_parallel_callbacks_cb, &channels_left) != 0) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+#pragma GCC diagnostic pop
+    timer_stop(BENCH_TIMER_DEV);
+
+    // Arm the requested amount of channels
+    for (unsigned int i = 0; i < channel_count; i++) {
+        if (timer_set(BENCH_TIMER_DEV, i, timeout) != 0) {
+            print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+            return -1;
+        }
+    }
+
+    // Execute timeout by starting timer and setting GPIO_IC
+    timer_start(BENCH_TIMER_DEV);
+    gpio_set(GPIO_IC);
+
+    // Wait for GPIO_IC to be cleard by attached callback function
+    while(channels_left > 0);
+    gpio_clear(GPIO_IC);
+    timer_stop(BENCH_TIMER_DEV);
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
 /* Helper calls */
 
 int cmd_get_metadata(int argc, char **argv) {
@@ -399,6 +481,7 @@ static const shell_command_t shell_commands[] = {
     {"bench_timer_set", "Benchmarks time consumed by a timer set", cmd_bench_timer_set},
     {"bench_timer_clear", "Benchmarks time consumed by a timer clear", cmd_bench_timer_clear},
     {"bench_absolute_timeout", "Benchmarks absolute timeouts", cmd_bench_absolute_timeouts},
+    {"bench_parallel_callbacks", "Benchmarks latency of parallel callbacks", cmd_bench_parallel_callbacks},
     {"get_metadata", "Get the metadata of the test firmware", cmd_get_metadata},
     {"calibrate_spin", "Calibrate clk specific board parameters", cmd_calibrate_spin},
     {"spin_timeout_ms", "Spin for the given amount of milliseconds", cmd_spin_timeout_ms},
