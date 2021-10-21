@@ -214,7 +214,7 @@ class PeriphUTimerBenchmarksIfBase(DutShell):
         """
         return self.send_cmd('spin_timeout_ms {}'.format(timeout_ms))
 
-    def verify_spin_timeout_ms(self, trace, timeout_ms, max_diff_ms=0.01, abort_on_error=True):
+    def verify_spin_timeout_ms(self, trace, timeout_ms, max_diff_ms=0.01, abort_on_error=False):
         """Verify that a spin timeout is within accepted time range.
 
         :param trace:           PHiLIP trace data from spin_timeout_ms()
