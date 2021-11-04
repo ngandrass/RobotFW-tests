@@ -49,7 +49,7 @@
 #error Board clock parameters not specified!
 #endif
 
-#define CYCLES_PER_SEC          (F_CPU / INSTRUCTIONS_PER_SPIN)
+#define CYCLES_PER_SEC          ((uint32_t) (F_CPU / INSTRUCTIONS_PER_SPIN))
 #define CYCLES_PER_MSEC         (CYCLES_PER_SEC / 1000)
 #define CYCLES_PER_USEC         (CYCLES_PER_MSEC / 1000)
 
@@ -93,7 +93,7 @@
 /**
  * @brief   Busy wait (spin) for the given number of loop iterations
  */
-static inline void spin(unsigned int n) {
+static inline void spin(uint32_t n) {
     while (n--) {
         __asm__ volatile ("");
     }

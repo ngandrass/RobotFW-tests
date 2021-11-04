@@ -41,4 +41,3 @@ Verify Board Parameters
     Run Keyword  Verify Spin Calibration  42    ${{ 0.1 * ${fac} }}  # ms
     Run Keyword  Verify Spin Calibration  100   ${{ 0.1 * ${fac} }}  # ms
     Run Keyword  Verify Spin Calibration  1000  ${{ 1.0 * ${fac} }}  # ms
-
