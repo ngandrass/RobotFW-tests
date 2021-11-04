@@ -37,26 +37,26 @@ Benchmark Parallel Callbacks
     Record Property             bench_parallel_callbacks          ${BENCH_RESULT}
 
 *** Test Cases ***
-Benchmark 1 Parallel Callbacks 1000@TIMER_SPEED
+Benchmark Parallel Callbacks 1x 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  ${%{TIMER_SPEED}}  1000  1  50
 
-Benchmark 2 Parallel Callbacks 1000@TIMER_SPEED
+Benchmark Parallel Callbacks 2x 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  ${%{TIMER_SPEED}}  1000  2  50
 
-Benchmark 3 Parallel Callbacks 1000@TIMER_SPEED
+Benchmark Parallel Callbacks 3x 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  ${%{TIMER_SPEED}}  1000  3  50
 
-Benchmark 4 Parallel Callbacks 1000@TIMER_SPEED
+Benchmark Parallel Callbacks 4x 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  ${%{TIMER_SPEED}}  1000  4  50
 
-Benchmark 5 Parallel Callbacks 1000@TIMER_SPEED
+Benchmark Parallel Callbacks 5x 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  ${%{TIMER_SPEED}}  1000  5  50
 
-Benchmark 6 Parallel Callbacks 1000@TIMER_SPEED
+Benchmark Parallel Callbacks 6x 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  ${%{TIMER_SPEED}}  1000  6  50
 
-Benchmark 7 Parallel Callbacks 1000@TIMER_SPEED
+Benchmark Parallel Callbacks 7x 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  ${%{TIMER_SPEED}}  1000  7  50
 
-Benchmark 8 Parallel Callbacks 1000@TIMER_SPEED
+Benchmark Parallel Callbacks 8x 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  ${%{TIMER_SPEED}}  1000  8  50
