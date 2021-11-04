@@ -23,12 +23,18 @@ BOARDS_TIMER_250kHz := \
     arduino-mega2560 \
     #
 
+BOARDS_TIMER_32kHz := \
+    #
+
 ifneq (,$(filter $(BOARDS_TIMER_250kHz),$(BOARD)))
 	TIMER_SPEED ?= 250000
+else ifneq (,$(filter $(BOARDS_TIMER_32kHz),$(BOARD)))
+    TIMER_SPEED ?= 32768
 else
 	TIMER_SPEED ?= 1000000
 endif
 
+CFLAGS += -DTIMER_SPEED=$(TIMER_SPEED)
 export TIMER_SPEED
 export BENCH_ADDITIONAL_TIMER_FREQUENCIES
 

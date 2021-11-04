@@ -32,6 +32,7 @@ Record Metadata
     Record Property             freq_cpu                ${RESULT['data'][4]}
     Record Property             instructions_per_spin   ${RESULT['data'][5]}
     Record Property             philip_backoff_spins    ${RESULT['data'][6]}
+    Record Property             timer_speed             ${RESULT['data'][7]}
 
 Verify Board Parameters
     ${fac}=      Convert To Number  ${%{SPIN_TIMEOUT_ACCEPTANCE_FACTOR}}

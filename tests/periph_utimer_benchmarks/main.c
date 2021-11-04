@@ -533,7 +533,7 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
 void _bench_parallel_callbacks_cb(void *arg, int channel) {
     (void) channel;
 
-    (*(volatile unsigned int *) arg)--;
+    (*(volatile uint16_t *) arg)--;
 
     return;
 }
@@ -644,6 +644,7 @@ int cmd_get_metadata(int argc, char **argv) {
     print_data_int(PARSER_DEV_NUM, F_CPU);
     print_data_int(PARSER_DEV_NUM, INSTRUCTIONS_PER_SPIN);
     print_data_int(PARSER_DEV_NUM, PHILIP_BACKOFF_SPINS);
+    print_data_int(PARSER_DEV_NUM, TIMER_SPEED);
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
 
     return 0;
