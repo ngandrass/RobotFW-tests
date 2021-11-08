@@ -5,7 +5,7 @@ Resource            api_shell.keywords.txt
 Resource            philip.keywords.txt
 
 *** Variables ***
-${TEST_REPEAT_TIMES}    10  # Number of times a single benchmark test case is repeated by default
+${TEST_REPEAT_TIMES}    %{TESTCASE_REPEATS}  # Number of times a single benchmark test case is repeated by default
 
 *** Keywords ***
 # reset application and check DUT has correct firmware, skip all tests on error

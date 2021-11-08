@@ -12,11 +12,6 @@ Suite Setup         Run Keywords    Default Suite Setup
 Test Setup          Run Keywords    Default Test Setup
 Test Teardown       Run Keywords    Default Test Teardown
 
-######### DEBUG START ##########
-#*** Variables ***
-#${TEST_REPEAT_TIMES}    1
-#########  DEBUG END  ##########
-
 *** Keywords ***
 Benchmark Periodic Timeouts
     [Arguments]  ${FREQ}  ${TICKS}  ${CYCLES}  ${REPEATS}
@@ -58,11 +53,11 @@ Benchmark Periodic Timeouts 100x 1000@TIMER_SPEED
 Benchmark Periodic Timeouts 1000x 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Periodic Timeouts  ${%{TIMER_SPEED}}  1000     1000   50
 
-Benchmark Periodic Timeouts 10x 10000@TIMER_SPEED
-    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Periodic Timeouts  ${%{TIMER_SPEED}}  10000    10     50
-
-Benchmark Periodic Timeouts 10x 100@TIMER_SPEED
-    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Periodic Timeouts  ${%{TIMER_SPEED}}  100      10     50
+#Benchmark Periodic Timeouts 10x 10000@TIMER_SPEED
+#    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Periodic Timeouts  ${%{TIMER_SPEED}}  10000    10     50
+#
+#Benchmark Periodic Timeouts 10x 100@TIMER_SPEED
+#    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Periodic Timeouts  ${%{TIMER_SPEED}}  100      10     50
 
 
 ###################

@@ -12,11 +12,6 @@ Suite Setup         Run Keywords    Default Suite Setup
 Test Setup          Run Keywords    Default Test Setup
 Test Teardown       Run Keywords    Default Test Teardown
 
-######### DEBUG START ##########
-#*** Variables ***
-#${TEST_REPEAT_TIMES}    1
-#########  DEBUG END  ##########
-
 *** Keywords ***
 Benchmark Absolute Timeouts
     [Arguments]  ${FREQ}  ${TICKS}  ${REPEATS}

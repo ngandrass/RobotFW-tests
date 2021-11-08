@@ -5,6 +5,7 @@ HIL_CMD_TIMEOUT   = 3   # seconds
 HIL_RESET_WAIT    = 0.1 # seconds
 HIL_CONNECT_WAIT ?= 0.5 # seconds
 BENCH_ADDITIONAL_TIMER_FREQUENCIES ?= 0  # If set to 1, additional timer frequencies besides TIMER_SPEED will be benchmarked
+TESTCASE_REPEATS ?= 10  # Number of times every test case is repeated
 
 USEMODULE += shell
 USEMODULE += periph_utimer
@@ -37,6 +38,7 @@ endif
 CFLAGS += -DTIMER_SPEED=$(TIMER_SPEED)
 export TIMER_SPEED
 export BENCH_ADDITIONAL_TIMER_FREQUENCIES
+export TESTCASE_REPEATS
 
 SPIN_TIMEOUT_ACCEPTANCE_FACTOR = 1.0
 export SPIN_TIMEOUT_ACCEPTANCE_FACTOR
