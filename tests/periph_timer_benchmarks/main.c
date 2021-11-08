@@ -372,7 +372,8 @@ int cmd_bench_parallel_callbacks(int argc, char** argv) {
     // Arm the requested amount of channels
     for (unsigned int i = 0; i < channel_count; i++) {
         if (timer_set(BENCH_TIMER_DEV, i, timeout) != 0) {
-            print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+            // print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+            print_result(PARSER_DEV_NUM, TEST_RESULT_SKIPPED);  // Consider any error as skip since periph_timer doesn't allow to check channel count...
             return -1;
         }
     }
