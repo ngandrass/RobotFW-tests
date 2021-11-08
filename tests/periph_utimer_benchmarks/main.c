@@ -530,6 +530,105 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
     return 0;
 }
 
+void _bench_periodic_timeouts_cb(void *arg, int channel) {
+    (void) channel;
+
+    (*(volatile uint16_t *) arg)--;
+
+    return;
+}
+
+/**
+ * @brief   Benchmarks a single periodic timeout
+ *
+ * The timer is initialized and set to zero before arming it to the desired
+ * periodic timout. Once prepared the timer is started. GPIO_IC is held high
+ * until the callback was executed CYCLES times. The benchmark finishes after
+ * CYCLES executions and releases GPIO_IC.
+ *
+ * @param argv[1]   Frequency used for the timer
+ * @param argv[2]   Timeout in ticks (absolute counter value)
+ * @param argv[3]   Number of callback executions to pass before benchmark
+ *                  finishes
+ */
+int cmd_bench_periodic_timeouts(int argc, char** argv) {
+    // Parse arguments
+    if (sc_args_check(argc, argv, 3, 3, "FREQUENCY TIMEOUT CYCLES") != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned long freq = 0;
+    if (sc_arg2ulong(argv[1], &freq) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    unsigned long timeout = 0;
+    if (sc_arg2ulong(argv[2], &timeout) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    uint16_t cycles = 0;
+    if (sc_arg2u16(argv[3], &cycles) != ARGS_OK) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    _bench_setup(ENABLE_IRQs);
+
+    // Get timer peripheral
+    utim_periph_t tim = utimer_get_periph(BENCH_TIMER_DEV);
+    if (tim.dev == UTIMER_DEV_INVALID || tim.channels < 1) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return ARGS_ERROR;
+    }
+
+    // Initialize timer and callback
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"  // Ignore warning about discarded volatile qualifier. It is restored within the ISR
+    volatile uint16_t cycles_left = cycles;
+    if (utimer_init(&tim, freq, UTIM_CLK_DEFAULT, &_bench_periodic_timeouts_cb, &cycles_left, NULL, NULL) != 0) {
+        print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        return -1;
+    }
+#pragma GCC diagnostic pop
+    utimer_stop(&tim);
+    utimer_write(&tim, 0);
+
+    if (((uint64_t) timeout) >> tim.width) {  // Skip on too large counter values
+        print_result(PARSER_DEV_NUM, TEST_RESULT_SKIPPED);
+        return -1;
+    }
+
+    int retval = utimer_set_periodic(&tim, 0, timeout, UTIM_FLAG_RESET_ON_MATCH);
+    if (retval != 0) {
+        if (retval == -3) {
+            // Skip if timer does not support periodic mode
+            print_result(PARSER_DEV_NUM, TEST_RESULT_SKIPPED);
+        } else {
+            // Signal error in any other case
+            print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
+        }
+        return -1;
+    }
+
+    // Execute timeout by starting timer and setting GPIO_IC
+    utimer_start(&tim);
+    gpio_set(GPIO_IC);
+
+    // Wait until the callback function was executed CYCLES times
+    while(cycles_left > 0);
+    gpio_clear(GPIO_IC);
+    utimer_stop(&tim);
+
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
+
+    _bench_teardown();
+    return 0;
+}
+
 void _bench_parallel_callbacks_cb(void *arg, int channel) {
     (void) channel;
 
@@ -726,6 +825,7 @@ static const shell_command_t shell_commands[] = {
     {"bench_timer_clear_uapi", "Benchmarks time consumed by a uAPI timer clear", cmd_bench_timer_clear_uapi},
     {"bench_timer_clear_hapi", "Benchmarks time consumed by a hAPI timer clear", cmd_bench_timer_clear_hapi},
     {"bench_absolute_timeout", "Benchmarks absolute timeouts", cmd_bench_absolute_timeouts},
+    {"bench_periodic_timeout", "Benchmarks periodic timeouts", cmd_bench_periodic_timeouts},
     {"bench_parallel_callbacks", "Benchmarks latency of parallel callbacks", cmd_bench_parallel_callbacks},
     {"get_metadata", "Get the metadata of the test firmware", cmd_get_metadata},
     {"calibrate_spin", "Calibrate clk specific board parameters", cmd_calibrate_spin},

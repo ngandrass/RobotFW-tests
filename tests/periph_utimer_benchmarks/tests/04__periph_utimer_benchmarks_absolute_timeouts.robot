@@ -1,12 +1,12 @@
 *** Settings ***
-Documentation       Benchmark timeout operations.
+Documentation       Benchmark absolute timeout operations.
 
 # import libs and keywords
 Resource            api_shell.keywords.txt
-Resource            periph_timer_benchmarks.keywords.txt
+Resource            periph_utimer_benchmarks.keywords.txt
 
 # add default tags to all tests
-Force Tags          periph_timer_benchmarks
+Force Tags          periph_utimer_benchmarks
 
 Suite Setup         Run Keywords    Default Suite Setup
 Test Setup          Run Keywords    Default Test Setup

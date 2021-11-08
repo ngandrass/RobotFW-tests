@@ -8,6 +8,7 @@ BENCH_ADDITIONAL_TIMER_FREQUENCIES ?= 0  # If set to 1, additional timer frequen
 
 USEMODULE += shell
 USEMODULE += periph_timer
+USEMODULE += periph_timer_periodic
 FEATURES_REQUIRED += periph_gpio
 FEATURES_REQUIRED += HIL_DUT_IC_PORT
 FEATURES_REQUIRED += HIL_DUT_IC_PIN

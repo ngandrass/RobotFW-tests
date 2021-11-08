@@ -162,7 +162,6 @@ class PeriphUTimerBenchmarksIfBase(DutShell):
 
         return self._calc_statistical_properties(clear_durations)
 
-
     def bench_absolute_timeout(self, freq, ticks):
         """Executes the absolute timeout benchmark.
 
@@ -173,6 +172,26 @@ class PeriphUTimerBenchmarksIfBase(DutShell):
 
     def process_bench_absolute_timeout(self, trace):
         """Postprocess trace data from absolute timeout benchmark."""
+
+        # Extract recorded timeout durations (time between rising and falling edge)
+        timeout_durations = [x['diff'] for x in trace if
+            x['source'] == "DUT_IC" and
+            x['event'] == "FALLING"
+        ]
+
+        return self._calc_statistical_properties(timeout_durations)
+
+    def bench_periodic_timeout(self, freq, ticks, cycles):
+        """Executes the periodic timeout benchmark.
+
+        :param freq:    Frequency to initialize the timer to
+        :param ticks:   Number of absolute timer ticks to timeout
+        :param cycles:  Number of periodic callback executions to pass
+        """
+        return self.send_cmd(f"bench_periodic_timeout {freq} {ticks} {cycles}")
+
+    def process_bench_periodic_timeout(self, trace):
+        """Postprocess trace data from periodic timeout benchmark."""
 
         # Extract recorded timeout durations (time between rising and falling edge)
         timeout_durations = [x['diff'] for x in trace if
