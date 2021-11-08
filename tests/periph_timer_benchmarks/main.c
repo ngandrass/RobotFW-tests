@@ -332,6 +332,7 @@ void _bench_periodic_timeouts_cb(void *arg, int channel) {
  *                  finishes
  */
 int cmd_bench_periodic_timeouts(int argc, char** argv) {
+#ifdef MODULE_PERIPH_TIMER_PERIODIC
     // Parse arguments
     if (sc_args_check(argc, argv, 3, 3, "FREQUENCY TIMEOUT CYCLES") != ARGS_OK) {
         print_result(PARSER_DEV_NUM, TEST_RESULT_ERROR);
@@ -387,6 +388,12 @@ int cmd_bench_periodic_timeouts(int argc, char** argv) {
 
     _bench_teardown();
     return 0;
+#else /** MODULE_PERIPH_TIMER_PERIODIC */
+    (void) argc;
+    (void) argv;
+    print_result(PARSER_DEV_NUM, TEST_RESULT_SKIPPED);
+    return -1;
+#endif /** MODULE_PERIPH_TIMER_PERIODIC */
 }
 
 void _bench_parallel_callbacks_cb(void *arg, int channel) {

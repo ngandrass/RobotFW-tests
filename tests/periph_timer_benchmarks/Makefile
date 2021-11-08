@@ -9,7 +9,10 @@ TESTCASE_REPEATS ?= 10  # Number of times every test case is repeated
 
 USEMODULE += shell
 USEMODULE += periph_timer
-USEMODULE += periph_timer_periodic
+ifneq (,$(filter $(FEATURES_PROVIDED),"periph_timer_periodic"))
+    USEMODULE += periph_timer_periodic
+endif
+
 FEATURES_REQUIRED += periph_gpio
 FEATURES_REQUIRED += HIL_DUT_IC_PORT
 FEATURES_REQUIRED += HIL_DUT_IC_PIN
