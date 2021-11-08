@@ -620,7 +620,7 @@ int cmd_bench_parallel_callbacks(int argc, char** argv) {
     utimer_start(&tim);
     gpio_set(GPIO_IC);
 
-    // Wait for GPIO_IC to be cleard by attached callback function
+    // Wait until all channels triggered the callback function
     while(channels_left > 0);
     gpio_clear(GPIO_IC);
     utimer_stop(&tim);
