@@ -34,6 +34,11 @@ else
     TICKS_TIMER_SPEED_1ms   ?= 1000
 endif
 
+# Board specific settings / tweaks
+ifeq ($(BOARD), "nucleo-l152re")
+    SPIN_TIMEOUT_ACCEPTANCE_FACTOR = 1.5
+endif
+
 # Compiler flags
 CFLAGS += -DTIMER_SPEED=$(TIMER_SPEED)
 CFLAGS += -DHIL_DUT_IC_PORT=$(HIL_DUT_IC_PORT) -DHIL_DUT_IC_PIN=$(HIL_DUT_IC_PIN)
