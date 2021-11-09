@@ -24,11 +24,14 @@ BOARDS_TIMER_32kHz := \
     #
 
 ifneq (,$(filter $(BOARDS_TIMER_250kHz),$(BOARD)))
-	TIMER_SPEED ?= 250000
+    TIMER_SPEED             ?= 250000
+    TICKS_TIMER_SPEED_1ms   ?= 250
 else ifneq (,$(filter $(BOARDS_TIMER_32kHz),$(BOARD)))
-    TIMER_SPEED ?= 32768
+    TIMER_SPEED             ?= 32768
+    TICKS_TIMER_SPEED_1ms   ?= 33    # Rounded value. Actual: 32,768
 else
-	TIMER_SPEED ?= 1000000
+    TIMER_SPEED             ?= 1000000
+    TICKS_TIMER_SPEED_1ms   ?= 1000
 endif
 
 # Compiler flags
@@ -46,4 +49,5 @@ export HIL_DUT_IC_PIN
 export HIL_DUT_IC_PORT
 export SPIN_TIMEOUT_ACCEPTANCE_FACTOR
 export TESTCASE_REPEATS
+export TICKS_TIMER_SPEED_1ms
 export TIMER_SPEED

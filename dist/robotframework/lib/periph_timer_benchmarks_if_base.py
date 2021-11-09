@@ -298,3 +298,11 @@ class PeriphUTimerBenchmarksIfBase(DutShell):
     def concat_traces(head, tail):
         """Concatenates two lists of traces."""
         return head + tail
+
+    @staticmethod
+    def ms2ticks(miliseconds, timer_speed):
+        """
+        Calculates the number of ticks that represent the number of
+        miliseconds at the given timer_speed.
+        """
+        return int(timer_speed/1e3 * miliseconds)
