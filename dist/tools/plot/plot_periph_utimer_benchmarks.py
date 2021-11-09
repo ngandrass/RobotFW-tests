@@ -474,6 +474,69 @@ class FigurePlotter:
         if self.dump_data:
             self._dump_dataframe_to_csv(df, title)
 
+    def plot_board_periodic_timeouts_grouped_by_timeout(self, board, timeout):
+        # Read, combine and process trace samples
+        timeouts = []
+        for testsuite, testsuite_data in self.benchmarks[board].items():
+            for case, data in testsuite_data['benchmarks'].items():
+                if case.startswith('Benchmark Periodic Timeouts'):
+                    if not data:
+                        continue
+
+                    case_timeout = int(data['ticks'][0])/int(data['frequency'][0])
+                    if case_timeout == timeout:
+                        for duration in self._extract_bench_values_from_json(data['bench_periodic_timeouts']):
+                            cycles = int(data['cycles'][0])
+                            duration = (duration / cycles) - self._get_gpio_latency(board)
+                            timeouts.append({
+                                'api': testsuite_data['api'],
+                                'frequency': int(data['frequency'][0]),
+                                'ticks': int(data['ticks'][0]),
+                                'cycles': cycles,
+                                'timeout': case_timeout,
+                                'duration': duration,
+                                'latency': duration - timeout
+                            })
+
+        if not timeouts:
+            LOG.error("No data for periodic timeouts for: board={}, timeout={}s".format(board, si_format(timeout)))
+            return
+
+        df = pd.DataFrame(timeouts)
+
+        # Calculate statistical properties
+        for api in df['api'].unique():
+            for cycles in df[df['api'] == api]['cycles'].unique():
+                LOG.info("Benchmark Periodic Timeouts {} - {}x {}s: {}".format(
+                    api,
+                    cycles,
+                    si_format(timeout, precision=0),
+                    self._calc_statistical_properties(df[(df['api'] == api) & (df['cycles'] == cycles)]['latency'])
+                ))
+
+        # Plot timeout latencies
+        fig = px.box(
+            data_frame=df,
+            x=[si_format(x, precision=0) for x in df['cycles']],
+            y='latency',
+            color='api',
+            points="outliers"
+        )
+        fig.update_layout(
+            title="Periodic Timeouts - Board: {}, Timeout Period: {}s".format(board, si_format(timeout)),
+            yaxis_title="Timeout Latency",
+            yaxis_ticksuffix="s",
+            xaxis_title="Timeout Cycles",
+            xaxis_ticksuffix="",
+            xaxis_showgrid=True,
+            yaxis_showgrid=True
+        )
+
+        title = "{}_bench_periodic_timeouts_grouped_by_timeout_{}s".format(board, si_format(timeout))
+        self._save_figure(fig, title)
+        if self.dump_data:
+            self._dump_dataframe_to_csv(df, title)
+
     def plot_board_parallel_callback_latencies(self, board):
         # Read, combine and process trace samples
         timeouts = []
@@ -898,7 +961,7 @@ def main():
         plotter.plot_simple_operations(operation)
         plotter.plot_simple_operations(operation, convert_to_cpu_cycles=True)
 
-    for freq in [1e7, 1e6, 1e5, 1e4]:
+    for freq in [1e7, 1e6, 1e5, 1e4, 250000, 32768]:
         for ticks in [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9]:
             plotter.plot_timeout_latencies(freq=freq, ticks=ticks)
 
@@ -923,6 +986,8 @@ def main():
         plotter.plot_board_absolute_timeouts_grouped_by_timeout(board, timeout=1e-2)
         plotter.plot_board_absolute_timeouts_grouped_by_timeout(board, timeout=1e-1)
         plotter.plot_board_absolute_timeouts_grouped_by_timeout(board, timeout=1e-0)
+
+        plotter.plot_board_periodic_timeouts_grouped_by_timeout(board, timeout=1e-3)
 
         plotter.plot_board_parallel_callback_latencies(board)
 
