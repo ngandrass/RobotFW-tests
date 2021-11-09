@@ -40,16 +40,16 @@ Benchmark Periodic Timeouts
 #########################################
 ## Timeouts based on ${%{TIMER_SPEED}} ##
 #########################################
-Benchmark Periodic Timeouts 1x 1000@TIMER_SPEED
+Benchmark Periodic Timeouts 1x 1ms@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Periodic Timeouts  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  1      50
 
-Benchmark Periodic Timeouts 10x 1000@TIMER_SPEED
+Benchmark Periodic Timeouts 10x 1ms@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Periodic Timeouts  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  10     50
 
-Benchmark Periodic Timeouts 100x 1000@TIMER_SPEED
+Benchmark Periodic Timeouts 100x 1ms@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Periodic Timeouts  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  100    50
 
-Benchmark Periodic Timeouts 1000x 1000@TIMER_SPEED
+Benchmark Periodic Timeouts 1000x 1ms@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Periodic Timeouts  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  1000   50
 
 #Benchmark Periodic Timeouts 10x 10000@TIMER_SPEED
