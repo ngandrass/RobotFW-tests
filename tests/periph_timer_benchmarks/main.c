@@ -311,9 +311,13 @@ int cmd_bench_absolute_timeouts(int argc, char** argv) {
 }
 
 void _bench_periodic_timeouts_cb(void *arg, int channel) {
-    (void) channel;
+    if ((*(volatile uint16_t *) arg) == 1) {
+        gpio_clear(GPIO_IC);
+    } else {
+        (*(volatile uint16_t *) arg)--;
+    }
 
-    (*(volatile uint16_t *) arg)--;
+    (void) channel;
 
     return;
 }
@@ -380,8 +384,7 @@ int cmd_bench_periodic_timeouts(int argc, char** argv) {
     gpio_set(GPIO_IC);
 
     // Wait until the callback function was executed CYCLES times
-    while(cycles_left > 0);
-    gpio_clear(GPIO_IC);
+    while(gpio_read(GPIO_IC));
     timer_stop(BENCH_TIMER_DEV);
 
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
@@ -397,9 +400,13 @@ int cmd_bench_periodic_timeouts(int argc, char** argv) {
 }
 
 void _bench_parallel_callbacks_cb(void *arg, int channel) {
-    (void) channel;
+    if ((*(volatile uint16_t *) arg) == 1) {
+        gpio_clear(GPIO_IC);
+    } else {
+        (*(volatile uint16_t *) arg)--;
+    }
 
-    (*(volatile uint16_t *) arg)--;
+    (void) channel;
 
     return;
 }
@@ -469,8 +476,7 @@ int cmd_bench_parallel_callbacks(int argc, char** argv) {
     gpio_set(GPIO_IC);
 
     // Wait for GPIO_IC to be cleard by attached callback function
-    while(channels_left > 0);
-    gpio_clear(GPIO_IC);
+    while(gpio_read(GPIO_IC));
     timer_stop(BENCH_TIMER_DEV);
 
     print_result(PARSER_DEV_NUM, TEST_RESULT_SUCCESS);
