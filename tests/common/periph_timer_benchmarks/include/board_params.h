@@ -64,7 +64,7 @@
 #endif /* CONFIG_BOARD_NUCLEO_L476RG */
 
 #ifdef CONFIG_BOARD_SLSTK3400A
-#define F_CPU                   CLOCK_CORECLOCK  // MHZ(25)
+#define F_CPU                   CLOCK_CORECLOCK  // MHZ(24)
 #define INSTRUCTIONS_PER_SPIN   5
 #endif /* CONFIG_BOARD_SLSTK3400A */
 
