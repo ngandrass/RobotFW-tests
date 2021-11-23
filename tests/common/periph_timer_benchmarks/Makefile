@@ -6,7 +6,7 @@ HIL_RESET_WAIT    = 0.1 # seconds
 HIL_CONNECT_WAIT ?= 0.5 # seconds
 
 BENCH_ADDITIONAL_TIMER_FREQUENCIES ?= 0  	# If set to 1, additional timer frequencies besides TIMER_SPEED will be benchmarked
-TESTCASE_REPEATS ?= 2     					# Number of times every test case is repeated
+TESTCASE_REPEATS ?= 10     					# Number of times every test case is repeated
 SPIN_TIMEOUT_ACCEPTANCE_FACTOR = 1.0  		# Scales the acceptance window for board timing parameter verification
 
 # Generic modules and features
