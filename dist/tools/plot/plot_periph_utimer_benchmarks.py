@@ -60,6 +60,9 @@ class FigurePlotter:
         self._calc_board_fcpu()
         self._calc_gpio_latencies()
 
+        # GPIO latencies 500 repeats (TEST_REPEATS = 10)
+        # self.gpio_latencies = {'arduino-mega2560': 5.010871000000085e-06, 'nucleo-l152re': 7.175460000000281e-07, 'stk3200': 1.083816000000127e-06, 'nucleo-f767zi': 4.309980000001695e-07, 'nucleo-f103rb': 4.6523099999990044e-07, 'esp32-wroom-32': 4.677369999999414e-07, 'z1': 7.87545200000019e-06, 'esp8266-esp-12x': 4.3250200000000227e-07, 'slstk3401a': 5.742140000002957e-07, 'slstk3400a': 1.083989999999952e-06, 'nucleo-g474re': 1.0577600000019707e-07}
+
     def _parse_all_benchmarks_from_dir(self, directory):
         for path in Path(directory).rglob(self.XUNIT_FILE_PATTERN):
             xunit_data = self._parse_xunit_file(path)
