@@ -619,6 +619,7 @@ class FigurePlotter:
                         'board': board,
                         'api': data['api'],
                         'duration': duration,
+                        'samples': len(gpio_latencies)
                     })
 
                 LOG.info("GPIO Latency 1us on board={} for api={}: {}".format(
