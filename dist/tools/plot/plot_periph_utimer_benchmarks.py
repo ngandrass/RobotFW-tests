@@ -689,8 +689,11 @@ class FigurePlotter:
                                 timeout_durations.append({
                                     'board': board,
                                     'api': suite_data['api'],
+                                    'frequency': freq,
+                                    'ticks': ticks,
                                     'duration': duration - self._get_gpio_latency(board),
-                                    'latency': duration - timeout - self._get_gpio_latency(board)
+                                    'latency': duration - timeout - self._get_gpio_latency(board),
+                                    'samples': len(durations)
                                 })
         if not timeout_durations:
             return
@@ -788,6 +791,7 @@ class FigurePlotter:
                                 'api': suite_data['api'],
                                 'operation': op_label,
                                 'duration': read_duration,
+                                'samples': len(durations) + int(len(durations)/49)
                             })
 
         if not op_durations:
