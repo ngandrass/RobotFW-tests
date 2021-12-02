@@ -790,6 +790,7 @@ class FigurePlotter:
                                 'board': board,
                                 'api': suite_data['api'],
                                 'operation': op_label,
+                                'functioncall': op.lower(),
                                 'duration': read_duration,
                                 'samples': len(durations) + int(len(durations)/49)
                             })
