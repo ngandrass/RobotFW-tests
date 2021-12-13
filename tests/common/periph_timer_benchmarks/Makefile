@@ -1,9 +1,9 @@
 INCLUDES += -I$(TESTBASE)/tests/common/periph_timer_benchmarks/include
 
 # Benchmark / RobotFramework configuration
-HIL_CMD_TIMEOUT   = 5   # seconds
-HIL_RESET_WAIT    = 0.5 # seconds
-HIL_CONNECT_WAIT ?= 1.5 # seconds
+HIL_CMD_TIMEOUT   = 3   # seconds
+HIL_RESET_WAIT    = 0.1 # seconds
+HIL_CONNECT_WAIT ?= 0.5 # seconds
 
 BENCH_ADDITIONAL_TIMER_FREQUENCIES ?= 0  	# If set to 1, additional timer frequencies besides TIMER_SPEED will be benchmarked
 TESTCASE_REPEATS ?= 3     					# Number of times every test case is repeated
@@ -37,6 +37,13 @@ endif
 # Board specific settings / tweaks
 ifeq ($(BOARD), "nucleo-l152re")
     SPIN_TIMEOUT_ACCEPTANCE_FACTOR = 1.5
+endif
+
+ifeq ($(BOARD), "z1")
+    SPIN_TIMEOUT_ACCEPTANCE_FACTOR  = 1.5
+    HIL_CMD_TIMEOUT                 = 5
+    HIL_RESET_WAIT                  = 2
+    HIL_CONNECT_WAIT                = 1
 endif
 
 # Compiler flags
