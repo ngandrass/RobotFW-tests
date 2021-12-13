@@ -40,9 +40,9 @@ ifeq ($(BOARD), "nucleo-l152re")
 endif
 
 ifeq ($(BOARD), "z1")
-    HIL_CMD_TIMEOUT                 = 5
-    HIL_RESET_WAIT                  = 2
-    HIL_CONNECT_WAIT                = 1
+    HIL_CMD_TIMEOUT     = 5
+    HIL_RESET_WAIT      = 2
+    HIL_CONNECT_WAIT    = 1
 endif
 
 # Compiler flags
