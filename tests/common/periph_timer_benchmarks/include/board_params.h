@@ -87,5 +87,5 @@
 #ifndef F_CPU
 #define F_CPU                   CLOCK_CORECLOCK  // MHZ(8)
 #endif
-#define INSTRUCTIONS_PER_SPIN   (7 * 1.026)
+#define INSTRUCTIONS_PER_SPIN   (7 * 1.0275)
 #endif /* CONFIG_BOARD_Z1 */
