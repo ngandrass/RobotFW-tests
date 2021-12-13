@@ -633,11 +633,11 @@ int cmd_bench_periodic_timeouts(int argc, char** argv) {
 }
 
 void _bench_parallel_callbacks_cb(void *arg, int channel) {
-    if ((*(volatile uint16_t *) arg) == 1) {
+    if ((*(volatile uint16_t *) arg) <= 1) {
         gpio_clear(GPIO_IC);
-    } else {
-        (*(volatile uint16_t *) arg)--;
     }
+
+    (*(volatile uint16_t *) arg)--;
 
     (void) channel;
 
