@@ -978,7 +978,7 @@ def main():
         plotter.plot_simple_operations(operation, convert_to_cpu_cycles=True)
 
     for freq in [1e7, 1e6, 1e5, 1e4, 250000, 32768]:
-        for ticks in [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9]:
+        for ticks in [1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 250]:
             plotter.plot_timeout_latencies(freq=freq, ticks=ticks)
 
     for channels in range(1, 9):

@@ -52,6 +52,9 @@ Benchmark Absolute Timeouts 10000@TIMER_SPEED
 Benchmark Absolute Timeouts 1000@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  ${%{TIMER_SPEED}}  1000     50
 
+Benchmark Absolute Timeouts 250@TIMER_SPEED
+    Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  ${%{TIMER_SPEED}}  250      50
+
 Benchmark Absolute Timeouts 100@TIMER_SPEED
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Absolute Timeouts  ${%{TIMER_SPEED}}  100      50
 
