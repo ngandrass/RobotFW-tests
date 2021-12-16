@@ -21,9 +21,9 @@ Benchmark Parallel Callbacks
 	Should be True  ${REPEATS} <= 50  # Don't generate more events than PHiLIP trace can hold
 
 	# Execute
-	FOR  ${n}  IN RANGE  ${REPEATS}
-		API Call Should Succeed Or Skip  Bench Parallel Callbacks  ${FREQ}  ${TICKS}  ${CHANNELS}
-	END
+    FOR  ${n}  IN RANGE  ${REPEATS}
+        API Call Should Succeed Or Skip  Bench Parallel Callbacks  ${FREQ}  ${TICKS}  ${CHANNELS}
+    END
 
 	# Evaluate
 	API Call Should Succeed     PHILIP.Read Trace
@@ -38,25 +38,65 @@ Benchmark Parallel Callbacks
 
 *** Test Cases ***
 Benchmark Parallel Callbacks 1x 1ms@TIMER_SPEED
-	Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  1  50
+    FOR  ${n}  IN RANGE  ${TEST_REPEAT_TIMES}
+        FOR  ${timeout_retries}  IN RANGE  5
+            ${status}  ${value}=  Run Keyword And Ignore Error  Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  1  50
+            Run Keyword If  "${status}" == "PASS"  Exit For Loop  ELSE Log To Console  ${value}
+        END
+    END
 
 Benchmark Parallel Callbacks 2x 1ms@TIMER_SPEED
-	Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  2  50
+    FOR  ${n}  IN RANGE  ${TEST_REPEAT_TIMES}
+        FOR  ${timeout_retries}  IN RANGE  5
+            ${status}  ${value}=  Run Keyword And Ignore Error  Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  2  50
+            Run Keyword If  "${status}" == "PASS"  Exit For Loop  ELSE Log To Console  ${value}
+        END
+    END
 
 Benchmark Parallel Callbacks 3x 1ms@TIMER_SPEED
-	Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  3  50
+    FOR  ${n}  IN RANGE  ${TEST_REPEAT_TIMES}
+        FOR  ${timeout_retries}  IN RANGE  5
+            ${status}  ${value}=  Run Keyword And Ignore Error  Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  3  50
+            Run Keyword If  "${status}" == "PASS"  Exit For Loop  ELSE Log To Console  ${value}
+        END
+    END
 
 Benchmark Parallel Callbacks 4x 1ms@TIMER_SPEED
-	Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  4  50
+    FOR  ${n}  IN RANGE  ${TEST_REPEAT_TIMES}
+        FOR  ${timeout_retries}  IN RANGE  5
+            ${status}  ${value}=  Run Keyword And Ignore Error  Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  4  50
+            Run Keyword If  "${status}" == "PASS"  Exit For Loop  ELSE Log To Console  ${value}
+        END
+    END
 
 Benchmark Parallel Callbacks 5x 1ms@TIMER_SPEED
-	Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  5  50
+    FOR  ${n}  IN RANGE  ${TEST_REPEAT_TIMES}
+        FOR  ${timeout_retries}  IN RANGE  5
+            ${status}  ${value}=  Run Keyword And Ignore Error  Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  5  50
+            Run Keyword If  "${status}" == "PASS"  Exit For Loop  ELSE Log To Console  ${value}
+        END
+    END
 
 Benchmark Parallel Callbacks 6x 1ms@TIMER_SPEED
-	Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  6  50
+    FOR  ${n}  IN RANGE  ${TEST_REPEAT_TIMES}
+        FOR  ${timeout_retries}  IN RANGE  5
+            ${status}  ${value}=  Run Keyword And Ignore Error  Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  6  50
+            Run Keyword If  "${status}" == "PASS"  Exit For Loop  ELSE Log To Console  ${value}
+        END
+    END
 
 Benchmark Parallel Callbacks 7x 1ms@TIMER_SPEED
-	Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  7  50
+    FOR  ${n}  IN RANGE  ${TEST_REPEAT_TIMES}
+        FOR  ${timeout_retries}  IN RANGE  5
+            ${status}  ${value}=  Run Keyword And Ignore Error  Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  7  50
+            Run Keyword If  "${status}" == "PASS"  Exit For Loop  ELSE Log To Console  ${value}
+        END
+    END
 
 Benchmark Parallel Callbacks 8x 1ms@TIMER_SPEED
-	Repeat Keyword  ${TEST_REPEAT_TIMES}    Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  8  50
+    FOR  ${n}  IN RANGE  ${TEST_REPEAT_TIMES}
+        FOR  ${timeout_retries}  IN RANGE  5
+            ${status}  ${value}=  Run Keyword And Ignore Error  Benchmark Parallel Callbacks  %{TIMER_SPEED}  %{TICKS_TIMER_SPEED_1ms}  8  50
+            Run Keyword If  "${status}" == "PASS"  Exit For Loop  ELSE Log To Console  ${value}
+        END
+    END
