@@ -29,10 +29,13 @@ Measure GPIO Latency 1us
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  1     #us
 
 Measure GPIO Latency 10us
+    Skip If  ${%{BENCH_ADDITIONAL_GPIO_LATENCIES}} != 1  Additional GPIO latency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  10    #us
 
 Measure GPIO Latency 100us
+    Skip If  ${%{BENCH_ADDITIONAL_GPIO_LATENCIES}} != 1  Additional GPIO latency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  100   #us
 
 Measure GPIO Latency 1000us
+    Skip If  ${%{BENCH_ADDITIONAL_GPIO_LATENCIES}} != 1  Additional GPIO latency benchmarks disabled
     Repeat Keyword  ${TEST_REPEAT_TIMES}    Measure GPIO Latency  1000  #us

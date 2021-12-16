@@ -5,9 +5,10 @@ HIL_CMD_TIMEOUT   = 3   # seconds
 HIL_RESET_WAIT    = 0.3 # seconds
 HIL_CONNECT_WAIT ?= 0.5 # seconds
 
-BENCH_ADDITIONAL_TIMER_FREQUENCIES ?= 0  	# If set to 1, additional timer frequencies besides TIMER_SPEED will be benchmarked
-TESTCASE_REPEATS ?= 3     					# Number of times every test case is repeated
-SPIN_TIMEOUT_ACCEPTANCE_FACTOR = 1.0  		# Scales the acceptance window for board timing parameter verification
+BENCH_ADDITIONAL_TIMER_FREQUENCIES  ?= 0    # If set to 1, additional timer frequencies besides TIMER_SPEED will be benchmarked
+BENCH_ADDITIONAL_GPIO_LATENCIES     ?= 0  	# If set to 1, additional GPIO latency spin durations will be benchmarked
+TESTCASE_REPEATS                    ?= 3	# Number of times every test case is repeated
+SPIN_TIMEOUT_ACCEPTANCE_FACTOR      = 1.0   # Scales the acceptance window for board timing parameter verification
 
 # Generic modules and features
 USEMODULE += shell
