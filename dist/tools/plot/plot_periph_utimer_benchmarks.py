@@ -934,9 +934,6 @@ class FigurePlotter:
 
 
 def main():
-    # Configure logging
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
     # Parse and verify CLI args
     parser = argparse.ArgumentParser("Plot generation routines for periph_(u)timer_benchmarks")
     parser.add_argument("indir", help="Input directory containing xunit.xml files to parse")
@@ -955,6 +952,16 @@ def main():
 
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
+
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler(os.path.join(args.outdir, "output.log"))
+        ]
+    )
 
     # Generate plots
     plotter = FigurePlotter(
