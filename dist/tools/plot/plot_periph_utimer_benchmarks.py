@@ -488,17 +488,20 @@ class FigurePlotter:
 
                     case_timeout = int(data['ticks'][0])/int(data['frequency'][0])
                     if case_timeout == timeout:
-                        for duration in self._extract_bench_values_from_json(data['bench_periodic_timeouts']):
+                        durations = self._extract_bench_values_from_json(data['bench_periodic_timeouts'])
+                        for duration in durations:
                             cycles = int(data['cycles'][0])
                             duration = (duration / cycles) - self._get_gpio_latency(board)
                             timeouts.append({
+                                'board': board,
                                 'api': testsuite_data['api'],
                                 'frequency': int(data['frequency'][0]),
                                 'ticks': int(data['ticks'][0]),
                                 'cycles': cycles,
                                 'timeout': case_timeout,
                                 'duration': duration,
-                                'latency': duration - timeout
+                                'latency': duration - timeout,
+                                'samples': len(durations)
                             })
 
         if not timeouts:
@@ -897,6 +900,15 @@ class FigurePlotter:
                     board,
                     self._calc_statistical_properties(df[(df['operation'] == op_label) & (df['board'] == board)]['duration'])
                 ))
+
+            LOG.info("Benchmark operation={} on board={}: uAPI <-> hAPI diff = {}".format(
+                op,
+                board,
+                (
+                    df[(df['operation'] == "periph_utimer (uAPI)") & (df['board'] == board)]['duration'].mean() -
+                    df[(df['operation'] == "periph_utimer (hAPI)") & (df['board'] == board)]['duration'].mean()
+                )
+            ))
 
         # Plot timeout latencies
         fig = px.box(
