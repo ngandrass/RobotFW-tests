@@ -1,8 +1,8 @@
 def str_4():
-	result = ""
-	for i in range(3, 16 + 3):
-	    result += str(i) + " "
-	return result
+    result = ""
+    for i in range(3, 16 + 3):
+        result += str(i) + " "
+    return result
 
 LIST__VAL_1 = [254]
 LIST__VAL_2 = [41]
@@ -19,25 +19,45 @@ LIST__VAL_9 = [254, 7, 8, 9, 10]
 LIST__VAL_10 = [254, 11, 2, 14, 5]
 
 
-def spi_speed_limits(spi_speed, sys_clock_speed, bytes):
+WARN_TOLERANCE = 0.1 #in percentage
+FAIL_TOLERANCE = 0.5 #in percentage
+SEC_TO_USEC = 1000000
+BITS_PER_BYTE = 8
 
-	for i in range(2):
-		if i == 0:
-			spi_speed_limit = spi_speed * 1.20
-		else:
-			spi_speed_limit = spi_speed * 0.8
+def spi_speed_comparison(expected_freq, frame_stats, sys_clock_speed, size):
+    expected_freq = int(expected_freq)
+    sys_clock_speed = int(sys_clock_speed)
+    size = int(size)
 
-		expected_byte_ticks = round((8 * sys_clock_speed) / spi_speed_limit)
-		expected_frame_ticks = expected_byte_ticks * bytes
-		error_tol = round(expected_byte_ticks * bytes / 8)
+    measured_freq = frame_stats['mean']
+    measured_byte_count =  len(frame_stats['values'])
+    assert measured_byte_count == size, 'Expected byte count does not match measured byte count'
 
-		if i == 0:
-			lower_limit = expected_frame_ticks - error_tol
-		else:
-			upper_limit = expected_frame_ticks + error_tol
+    result = {}
+    result['pass'] = False
+    result['warn'] = False
+    result['measured_freq'] = measured_freq
+    result['difference_percentage'] = 0
+    result['byte_count'] = measured_byte_count
 
-	return [lower_limit, upper_limit]
+    warn_limits = calculate_limits(expected_freq, WARN_TOLERANCE)
+    fail_limits = calculate_limits(expected_freq, FAIL_TOLERANCE)
 
+    if measured_freq >= fail_limits['lower_limit'] and measured_freq <= fail_limits['upper_limit']:
+        result['pass'] = True
+        if measured_freq < warn_limits['lower_limit'] or measured_freq > warn_limits['upper_limit']:
+            result['warn'] = True
 
-def convert_ticks_to_us(ticks, sys_clock_speed):
-	return round(ticks / sys_clock_speed * 1000000, 3)
+    result['difference_percentage'] = round((measured_freq - expected_freq) / expected_freq * 100, 2)
+
+    return result
+
+def calculate_limits(expected_freq, tolerance):
+    result = {}
+    result['lower_limit'] = int(SEC_TO_USEC / (1 / (expected_freq * (1 - tolerance)) * SEC_TO_USEC))
+    result['upper_limit'] = int(expected_freq * (1 + tolerance))
+    return result
+
+def ticks_to_us(ticks, sys_clock_speed):
+    sToUs = 1000000
+    return round(ticks / sys_clock_speed * sToUs, 3)
